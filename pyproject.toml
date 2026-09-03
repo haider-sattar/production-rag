@@ -1,0 +1,29 @@
+[project]
+name = "production-rag"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Ali Haider", email = "haiderjutt2k2@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "pydantic-settings>=2.15.0",
+    "pymupdf>=1.28.2",
+    "python-dotenv>=1.2.3",
+    "qdrant-client>=1.19.0",
+    "sentence-transformers>=6.0.1",
+]
+
+[project.scripts]
+production-rag = "production_rag:main"
+
+[build-system]
+requires = ["uv_build>=0.12.9,<0.13.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+    "ruff>=0.16.5",
+]
