@@ -1,9 +1,12 @@
 import argparse
 
+
+
 from rag.ingestion.chunker import chunk_pages
 from rag.ingestion.parser import parse_pdf
 from rag.retrieval.embeddings import EmbeddingService
 
+from rag.retrieval.vector_store import VectorStore
 
 def main() -> None:
     """
@@ -41,6 +44,26 @@ def main() -> None:
         token_counter=embedding_service.count_tokens,
         token_splitter=embedding_service.split_by_tokens,
     )
+    # Convert chunk text into embedding vectors.
+    texts = [chunk.text for chunk in chunks]
+
+    embeddings = embedding_service.embed_batch(texts)
+
+    print(f"Created embeddings: {len(embeddings)}")
+
+    # Connect to Qdrant.
+    vector_store = VectorStore()
+
+    # Ensure the collection exists before storing points.
+    vector_store.create_collection()
+
+    # Store vectors together with chunk metadata.
+    vector_store.store_chunks(
+        chunks=chunks,
+        embeddings=embeddings,
+    )
+
+    print(f"Stored {len(chunks)} chunks in Qdrant")
 
     print(f"Created chunks: {len(chunks)}")
 

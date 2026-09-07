@@ -1,36 +1,35 @@
 import argparse
 
-from rag.retrieval.embeddings import EmbeddingService
-from rag.retrieval.retriever import Retriever
+from rag.retrieval.reranking_retriever import (
+    RerankingRetriever,
+)
 
 
 def main() -> None:
-    """
-    Development CLI for testing semantic retrieval.
-    """
-
     parser = argparse.ArgumentParser(
-        description="Search ingested documents using semantic similarity."
+        description=(
+            "Search using hybrid retrieval and "
+            "cross-encoder reranking."
+        )
     )
 
     parser.add_argument(
         "query",
-        help="Question or search query.",
+        help="Search query",
     )
 
     parser.add_argument(
         "--top-k",
         type=int,
         default=5,
-        help="Number of chunks to retrieve.",
+        help="Number of final results",
     )
 
     args = parser.parse_args()
 
-    embedding_service = EmbeddingService()
-
-    retriever = Retriever(
-        embedding_service=embedding_service,
+    retriever = RerankingRetriever(
+        rerank_candidates=20,
+        batch_size=16,
     )
 
     results = retriever.search(
@@ -42,11 +41,17 @@ def main() -> None:
     print(f"Query: {args.query}")
     print(f"Retrieved chunks: {len(results)}")
 
-    for rank, result in enumerate(results, start=1):
+    for rank, result in enumerate(
+        results,
+        start=1,
+    ):
         print()
         print("=" * 70)
         print(f"Rank: {rank}")
-        print(f"Score: {result.score:.4f}")
+        print(
+            f"Reranker score: "
+            f"{result.score:.6f}"
+        )
         print(f"File: {result.filename}")
         print(f"Page: {result.page_number}")
         print(f"Chunk: {result.chunk_index}")

@@ -1,0 +1,935 @@
+{
+  "metrics": {
+    "retriever": "reranked",
+    "num_questions": 45,
+    "top_k": 5,
+    "hit@1": 0.6444444444444445,
+    "hit@3": 0.9111111111111111,
+    "hit@5": 0.9111111111111111,
+    "mrr": 0.7703703703703705,
+    "rerank_candidates": 10
+  },
+  "results": [
+    {
+      "id": "q001",
+      "query": "What does the report mean by small AI?",
+      "query_type": "definition",
+      "difficulty": "easy",
+      "relevant_pages": [
+        15
+      ],
+      "retrieved_pages": [
+        12,
+        15,
+        11,
+        27,
+        114
+      ],
+      "hit@1": 0.0,
+      "hit@3": 1.0,
+      "hit@5": 1.0,
+      "reciprocal_rank": 0.5
+    },
+    {
+      "id": "q002",
+      "query": "How does the report broadly define artificial intelligence?",
+      "query_type": "definition",
+      "difficulty": "easy",
+      "relevant_pages": [
+        24
+      ],
+      "retrieved_pages": [
+        136,
+        27,
+        34,
+        46,
+        121
+      ],
+      "hit@1": 0.0,
+      "hit@3": 0.0,
+      "hit@5": 0.0,
+      "reciprocal_rank": 0.0
+    },
+    {
+      "id": "q003",
+      "query": "How does generative AI extend the capabilities of traditional task-focused AI?",
+      "query_type": "semantic",
+      "difficulty": "medium",
+      "relevant_pages": [
+        24,
+        25
+      ],
+      "retrieved_pages": [
+        26,
+        25,
+        24,
+        45,
+        15
+      ],
+      "hit@1": 0.0,
+      "hit@3": 1.0,
+      "hit@5": 1.0,
+      "reciprocal_rank": 0.5
+    },
+    {
+      "id": "q004",
+      "query": "What is multimodal AI according to the report?",
+      "query_type": "exact_term",
+      "difficulty": "easy",
+      "relevant_pages": [
+        26
+      ],
+      "retrieved_pages": [
+        26,
+        24,
+        27,
+        81,
+        28
+      ],
+      "hit@1": 1.0,
+      "hit@3": 1.0,
+      "hit@5": 1.0,
+      "reciprocal_rank": 1.0
+    },
+    {
+      "id": "q005",
+      "query": "What capabilities let agentic AI operate with less human guidance than conventional AI systems?",
+      "query_type": "semantic",
+      "difficulty": "hard",
+      "relevant_pages": [
+        26
+      ],
+      "retrieved_pages": [
+        26,
+        132,
+        28,
+        117,
+        24
+      ],
+      "hit@1": 1.0,
+      "hit@3": 1.0,
+      "hit@5": 1.0,
+      "reciprocal_rank": 1.0
+    },
+    {
+      "id": "q006",
+      "query": "What is physical AI, and how does it obtain information from the real world?",
+      "query_type": "definition",
+      "difficulty": "medium",
+      "relevant_pages": [
+        27
+      ],
+      "retrieved_pages": [
+        32,
+        28,
+        26,
+        24,
+        80
+      ],
+      "hit@1": 0.0,
+      "hit@3": 0.0,
+      "hit@5": 0.0,
+      "reciprocal_rank": 0.0
+    },
+    {
+      "id": "q007",
+      "query": "What are the four foundational 4Cs of AI readiness?",
+      "query_type": "exact_term",
+      "difficulty": "easy",
+      "relevant_pages": [
+        11,
+        16,
+        24,
+        42
+      ],
+      "retrieved_pages": [
+        27,
+        43,
+        42,
+        114,
+        16
+      ],
+      "hit@1": 0.0,
+      "hit@3": 1.0,
+      "hit@5": 1.0,
+      "reciprocal_rank": 0.3333333333333333
+    },
+    {
+      "id": "q008",
+      "query": "Why can developing countries benefit from AI without recreating foundational models from the ground up?",
+      "query_type": "cause",
+      "difficulty": "hard",
+      "relevant_pages": [
+        15,
+        23
+      ],
+      "retrieved_pages": [
+        23,
+        15,
+        114,
+        80,
+        36
+      ],
+      "hit@1": 1.0,
+      "hit@3": 1.0,
+      "hit@5": 1.0,
+      "reciprocal_rank": 1.0
+    },
+    {
+      "id": "q009",
+      "query": "What two properties make AI fundamentally different from earlier general-purpose technologies such as electricity and computers?",
+      "query_type": "comparison",
+      "difficulty": "hard",
+      "relevant_pages": [
+        28
+      ],
+      "retrieved_pages": [
+        28,
+        136,
+        114,
+        24,
+        34
+      ],
+      "hit@1": 1.0,
+      "hit@3": 1.0,
+      "hit@5": 1.0,
+      "reciprocal_rank": 1.0
+    },
+    {
+      "id": "q010",
+      "query": "How many people, countries, and years were involved in GenAI tool uptake shortly after ChatGPT launched?",
+      "query_type": "numeric",
+      "difficulty": "medium",
+      "relevant_pages": [
+        24
+      ],
+      "retrieved_pages": [
+        36,
+        24,
+        37,
+        39,
+        38
+      ],
+      "hit@1": 0.0,
+      "hit@3": 1.0,
+      "hit@5": 1.0,
+      "reciprocal_rank": 0.5
+    },
+    {
+      "id": "q011",
+      "query": "What shares of notable AI models, AI start-ups, and cumulative AI start-up venture capital funding belonged to high-income countries in July 2025?",
+      "query_type": "numeric",
+      "difficulty": "medium",
+      "relevant_pages": [
+        15
+      ],
+      "retrieved_pages": [
+        15,
+        36,
+        34,
+        23,
+        35
+      ],
+      "hit@1": 1.0,
+      "hit@3": 1.0,
+      "hit@5": 1.0,
+      "reciprocal_rank": 1.0
+    },
+    {
+      "id": "q012",
+      "query": "How large was the ChatGPT traffic gap between middle-income and low-income countries in mid-2025?",
+      "query_type": "comparison",
+      "difficulty": "medium",
+      "relevant_pages": [
+        16,
+        24
+      ],
+      "retrieved_pages": [
+        16,
+        47,
+        38,
+        56,
+        24
+      ],
+      "hit@1": 1.0,
+      "hit@3": 1.0,
+      "hit@5": 1.0,
+      "reciprocal_rank": 1.0
+    },
+    {
+      "id": "q013",
+      "query": "Between 2022 and 2024, which income group recorded the largest percentage-point rise in internet use, and what level did it reach?",
+      "query_type": "numeric",
+      "difficulty": "hard",
+      "relevant_pages": [
+        16,
+        54
+      ],
+      "retrieved_pages": [
+        47,
+        53,
+        54,
+        9,
+        55
+      ],
+      "hit@1": 0.0,
+      "hit@3": 1.0,
+      "hit@5": 1.0,
+      "reciprocal_rank": 0.3333333333333333
+    },
+    {
+      "id": "q014",
+      "query": "What was annual data traffic per capita in 2023 across HICs, UMICs, LMICs, and LICs?",
+      "query_type": "numeric",
+      "difficulty": "easy",
+      "relevant_pages": [
+        16,
+        47,
+        56
+      ],
+      "retrieved_pages": [
+        16,
+        56,
+        47,
+        58,
+        54
+      ],
+      "hit@1": 1.0,
+      "hit@3": 1.0,
+      "hit@5": 1.0,
+      "reciprocal_rank": 1.0
+    },
+    {
+      "id": "q015",
+      "query": "What proportion of each income group had 5G coverage in 2024?",
+      "query_type": "numeric",
+      "difficulty": "easy",
+      "relevant_pages": [
+        16,
+        49
+      ],
+      "retrieved_pages": [
+        48,
+        49,
+        54,
+        56,
+        9
+      ],
+      "hit@1": 0.0,
+      "hit@3": 1.0,
+      "hit@5": 1.0,
+      "reciprocal_rank": 0.5
+    },
+    {
+      "id": "q016",
+      "query": "Which parts of the connectivity divide improved, and which worsened between richer and poorer countries?",
+      "query_type": "comparison",
+      "difficulty": "hard",
+      "relevant_pages": [
+        47
+      ],
+      "retrieved_pages": [
+        16,
+        47,
+        54,
+        49,
+        55
+      ],
+      "hit@1": 0.0,
+      "hit@3": 1.0,
+      "hit@5": 1.0,
+      "reciprocal_rank": 0.5
+    },
+    {
+      "id": "q017",
+      "query": "What are nonterrestrial networks (NTNs), and what kinds of platforms do they include?",
+      "query_type": "exact_term",
+      "difficulty": "medium",
+      "relevant_pages": [
+        48
+      ],
+      "retrieved_pages": [
+        48,
+        49,
+        120,
+        50,
+        23
+      ],
+      "hit@1": 1.0,
+      "hit@3": 1.0,
+      "hit@5": 1.0,
+      "reciprocal_rank": 1.0
+    },
+    {
+      "id": "q018",
+      "query": "How did 5G coverage change in LMICs from 2022 to 2024, and how did their 2024 level compare with LICs?",
+      "query_type": "comparison",
+      "difficulty": "medium",
+      "relevant_pages": [
+        48,
+        49
+      ],
+      "retrieved_pages": [
+        16,
+        49,
+        54,
+        53,
+        48
+      ],
+      "hit@1": 0.0,
+      "hit@3": 1.0,
+      "hit@5": 1.0,
+      "reciprocal_rank": 0.5
+    },
+    {
+      "id": "q019",
+      "query": "What two statistics describe the expansion of commercial communications satellites since 2015?",
+      "query_type": "numeric",
+      "difficulty": "medium",
+      "relevant_pages": [
+        48,
+        49
+      ],
+      "retrieved_pages": [
+        48,
+        50,
+        49,
+        9,
+        16
+      ],
+      "hit@1": 1.0,
+      "hit@3": 1.0,
+      "hit@5": 1.0,
+      "reciprocal_rank": 1.0
+    },
+    {
+      "id": "q020",
+      "query": "What policy levers can expand broadband infrastructure while making devices more affordable?",
+      "query_type": "multi_factor",
+      "difficulty": "hard",
+      "relevant_pages": [
+        48,
+        59
+      ],
+      "retrieved_pages": [
+        48,
+        59,
+        16,
+        128,
+        75
+      ],
+      "hit@1": 1.0,
+      "hit@3": 1.0,
+      "hit@5": 1.0,
+      "reciprocal_rank": 1.0
+    },
+    {
+      "id": "q021",
+      "query": "How does the report define compute in the AI context?",
+      "query_type": "definition",
+      "difficulty": "easy",
+      "relevant_pages": [
+        62
+      ],
+      "retrieved_pages": [
+        27,
+        136,
+        116,
+        42,
+        63
+      ],
+      "hit@1": 0.0,
+      "hit@3": 0.0,
+      "hit@5": 0.0,
+      "reciprocal_rank": 0.0
+    },
+    {
+      "id": "q022",
+      "query": "How concentrated were secure internet servers in 2024, and how did US availability per person compare with typical MICs and LICs?",
+      "query_type": "comparison",
+      "difficulty": "hard",
+      "relevant_pages": [
+        61
+      ],
+      "retrieved_pages": [
+        16,
+        61,
+        68,
+        54,
+        37
+      ],
+      "hit@1": 0.0,
+      "hit@3": 1.0,
+      "hit@5": 1.0,
+      "reciprocal_rank": 0.5
+    },
+    {
+      "id": "q023",
+      "query": "How were the world's top 500 HPC systems and their capacity distributed?",
+      "query_type": "exact_term",
+      "difficulty": "medium",
+      "relevant_pages": [
+        61,
+        68
+      ],
+      "retrieved_pages": [
+        61,
+        68,
+        67,
+        76,
+        16
+      ],
+      "hit@1": 1.0,
+      "hit@3": 1.0,
+      "hit@5": 1.0,
+      "reciprocal_rank": 1.0
+    },
+    {
+      "id": "q024",
+      "query": "How was global co-location data-center capacity divided by income group in June 2025?",
+      "query_type": "numeric",
+      "difficulty": "easy",
+      "relevant_pages": [
+        61
+      ],
+      "retrieved_pages": [
+        61,
+        67,
+        16,
+        68,
+        66
+      ],
+      "hit@1": 1.0,
+      "hit@3": 1.0,
+      "hit@5": 1.0,
+      "reciprocal_rank": 1.0
+    },
+    {
+      "id": "q025",
+      "query": "What share of global cloud-computing exports came from the United States, and where did its 2023 exports go by income group?",
+      "query_type": "numeric",
+      "difficulty": "hard",
+      "relevant_pages": [
+        61,
+        69
+      ],
+      "retrieved_pages": [
+        69,
+        16,
+        61,
+        51,
+        52
+      ],
+      "hit@1": 1.0,
+      "hit@3": 1.0,
+      "hit@5": 1.0,
+      "reciprocal_rank": 1.0
+    },
+    {
+      "id": "q026",
+      "query": "Why can domestic data centers be economically attractive yet difficult or risky for developing countries?",
+      "query_type": "multi_factor",
+      "difficulty": "hard",
+      "relevant_pages": [
+        61,
+        70
+      ],
+      "retrieved_pages": [
+        72,
+        70,
+        74,
+        16,
+        71
+      ],
+      "hit@1": 0.0,
+      "hit@3": 1.0,
+      "hit@5": 1.0,
+      "reciprocal_rank": 0.5
+    },
+    {
+      "id": "q027",
+      "query": "What market barriers commonly discourage private investment in compute infrastructure?",
+      "query_type": "multi_factor",
+      "difficulty": "medium",
+      "relevant_pages": [
+        62
+      ],
+      "retrieved_pages": [
+        62,
+        72,
+        73,
+        116,
+        71
+      ],
+      "hit@1": 1.0,
+      "hit@3": 1.0,
+      "hit@5": 1.0,
+      "reciprocal_rank": 1.0
+    },
+    {
+      "id": "q028",
+      "query": "How do owning compute infrastructure and renting cloud capacity differ in cost, flexibility, control, and operational burden?",
+      "query_type": "comparison",
+      "difficulty": "hard",
+      "relevant_pages": [
+        65,
+        66
+      ],
+      "retrieved_pages": [
+        65,
+        66,
+        70,
+        72,
+        63
+      ],
+      "hit@1": 1.0,
+      "hit@3": 1.0,
+      "hit@5": 1.0,
+      "reciprocal_rank": 1.0
+    },
+    {
+      "id": "q029",
+      "query": "Why can physical distance from a data center degrade a real-time AI application?",
+      "query_type": "cause",
+      "difficulty": "medium",
+      "relevant_pages": [
+        66
+      ],
+      "retrieved_pages": [
+        66,
+        125,
+        30,
+        128,
+        32
+      ],
+      "hit@1": 1.0,
+      "hit@3": 1.0,
+      "hit@5": 1.0,
+      "reciprocal_rank": 1.0
+    },
+    {
+      "id": "q030",
+      "query": "Which workload characteristics favor purchased infrastructure, and which favor cloud computing?",
+      "query_type": "comparison",
+      "difficulty": "hard",
+      "relevant_pages": [
+        66
+      ],
+      "retrieved_pages": [
+        66,
+        75,
+        72,
+        63,
+        61
+      ],
+      "hit@1": 1.0,
+      "hit@3": 1.0,
+      "hit@5": 1.0,
+      "reciprocal_rank": 1.0
+    },
+    {
+      "id": "q031",
+      "query": "How large is the basic digital-skills gap between high-income and low-income countries?",
+      "query_type": "comparison",
+      "difficulty": "medium",
+      "relevant_pages": [
+        17,
+        103
+      ],
+      "retrieved_pages": [
+        103,
+        93,
+        47,
+        104,
+        98
+      ],
+      "hit@1": 1.0,
+      "hit@3": 1.0,
+      "hit@5": 1.0,
+      "reciprocal_rank": 1.0
+    },
+    {
+      "id": "q032",
+      "query": "Which countries held the largest shares of the world's ICT specialists in 2023?",
+      "query_type": "named_entity",
+      "difficulty": "easy",
+      "relevant_pages": [
+        104
+      ],
+      "retrieved_pages": [
+        51,
+        104,
+        52,
+        67,
+        68
+      ],
+      "hit@1": 0.0,
+      "hit@3": 1.0,
+      "hit@5": 1.0,
+      "reciprocal_rank": 0.5
+    },
+    {
+      "id": "q033",
+      "query": "What evidence suggests that university ICT curricula in Africa are not keeping pace with technology?",
+      "query_type": "numeric",
+      "difficulty": "medium",
+      "relevant_pages": [
+        105
+      ],
+      "retrieved_pages": [
+        105,
+        104,
+        107,
+        96,
+        93
+      ],
+      "hit@1": 1.0,
+      "hit@3": 1.0,
+      "hit@5": 1.0,
+      "reciprocal_rank": 1.0
+    },
+    {
+      "id": "q034",
+      "query": "Why do infrastructure constraints make digital-skills development especially difficult in low-income countries?",
+      "query_type": "cause",
+      "difficulty": "hard",
+      "relevant_pages": [
+        105
+      ],
+      "retrieved_pages": [
+        72,
+        109,
+        118,
+        42,
+        59
+      ],
+      "hit@1": 0.0,
+      "hit@3": 0.0,
+      "hit@5": 0.0,
+      "reciprocal_rank": 0.0
+    },
+    {
+      "id": "q035",
+      "query": "What did the report say about Coursera's global reach and female participation by April 2025?",
+      "query_type": "numeric",
+      "difficulty": "medium",
+      "relevant_pages": [
+        105
+      ],
+      "retrieved_pages": [
+        105,
+        111,
+        93,
+        76,
+        78
+      ],
+      "hit@1": 1.0,
+      "hit@3": 1.0,
+      "hit@5": 1.0,
+      "reciprocal_rank": 1.0
+    },
+    {
+      "id": "q036",
+      "query": "Among people claiming GenAI skills, how prominent are ICT professionals in HICs versus LMICs?",
+      "query_type": "comparison",
+      "difficulty": "medium",
+      "relevant_pages": [
+        106
+      ],
+      "retrieved_pages": [
+        106,
+        93,
+        107,
+        102,
+        103
+      ],
+      "hit@1": 1.0,
+      "hit@3": 1.0,
+      "hit@5": 1.0,
+      "reciprocal_rank": 1.0
+    },
+    {
+      "id": "q037",
+      "query": "Why does the report conclude that GenAI adoption remains nascent even in highly exposed non-ICT occupations?",
+      "query_type": "cause",
+      "difficulty": "hard",
+      "relevant_pages": [
+        106
+      ],
+      "retrieved_pages": [
+        106,
+        103,
+        39,
+        99,
+        15
+      ],
+      "hit@1": 1.0,
+      "hit@3": 1.0,
+      "hit@5": 1.0,
+      "reciprocal_rank": 1.0
+    },
+    {
+      "id": "q038",
+      "query": "Which countries experienced the most severe high-skilled talent outflows relative to inflows?",
+      "query_type": "named_entity",
+      "difficulty": "medium",
+      "relevant_pages": [
+        17,
+        107
+      ],
+      "retrieved_pages": [
+        107,
+        94,
+        17,
+        108,
+        131
+      ],
+      "hit@1": 1.0,
+      "hit@3": 1.0,
+      "hit@5": 1.0,
+      "reciprocal_rank": 1.0
+    },
+    {
+      "id": "q039",
+      "query": "How does the birthplace of elite AI researchers compare with where they ultimately work?",
+      "query_type": "comparison",
+      "difficulty": "hard",
+      "relevant_pages": [
+        107
+      ],
+      "retrieved_pages": [
+        94,
+        107,
+        116,
+        33,
+        30
+      ],
+      "hit@1": 0.0,
+      "hit@3": 1.0,
+      "hit@5": 1.0,
+      "reciprocal_rank": 0.5
+    },
+    {
+      "id": "q040",
+      "query": "What interconnected barriers keep developing countries from cultivating and retaining digital talent?",
+      "query_type": "multi_factor",
+      "difficulty": "hard",
+      "relevant_pages": [
+        108,
+        109
+      ],
+      "retrieved_pages": [
+        108,
+        109,
+        59,
+        94,
+        72
+      ],
+      "hit@1": 1.0,
+      "hit@3": 1.0,
+      "hit@5": 1.0,
+      "reciprocal_rank": 1.0
+    },
+    {
+      "id": "q041",
+      "query": "What device-access measures are recommended for countries with low AI readiness?",
+      "query_type": "multi_factor",
+      "difficulty": "medium",
+      "relevant_pages": [
+        59,
+        109
+      ],
+      "retrieved_pages": [
+        109,
+        115,
+        11,
+        73,
+        116
+      ],
+      "hit@1": 1.0,
+      "hit@3": 1.0,
+      "hit@5": 1.0,
+      "reciprocal_rank": 1.0
+    },
+    {
+      "id": "q042",
+      "query": "Which Malaysian initiative illustrates how digital-literacy programs can be adapted to local language and needs?",
+      "query_type": "named_entity",
+      "difficulty": "easy",
+      "relevant_pages": [
+        109
+      ],
+      "retrieved_pages": [
+        109,
+        125,
+        103,
+        42,
+        82
+      ],
+      "hit@1": 1.0,
+      "hit@3": 1.0,
+      "hit@5": 1.0,
+      "reciprocal_rank": 1.0
+    },
+    {
+      "id": "q043",
+      "query": "How can medium-readiness countries make workforce training more responsive to changing digital-skill needs?",
+      "query_type": "multi_factor",
+      "difficulty": "hard",
+      "relevant_pages": [
+        109
+      ],
+      "retrieved_pages": [
+        109,
+        105,
+        96,
+        99,
+        95
+      ],
+      "hit@1": 1.0,
+      "hit@3": 1.0,
+      "hit@5": 1.0,
+      "reciprocal_rank": 1.0
+    },
+    {
+      "id": "q044",
+      "query": "Why should high-readiness countries help universities and start-ups access compute and training data?",
+      "query_type": "cause",
+      "difficulty": "hard",
+      "relevant_pages": [
+        110
+      ],
+      "retrieved_pages": [
+        110,
+        83,
+        73,
+        62,
+        87
+      ],
+      "hit@1": 1.0,
+      "hit@3": 1.0,
+      "hit@5": 1.0,
+      "reciprocal_rank": 1.0
+    },
+    {
+      "id": "q045",
+      "query": "What policies can high-readiness countries use to retain domestic digital talent and attract experts from abroad?",
+      "query_type": "multi_factor",
+      "difficulty": "medium",
+      "relevant_pages": [
+        110
+      ],
+      "retrieved_pages": [
+        110,
+        108,
+        109,
+        74,
+        132
+      ],
+      "hit@1": 1.0,
+      "hit@3": 1.0,
+      "hit@5": 1.0,
+      "reciprocal_rank": 1.0
+    }
+  ]
+}

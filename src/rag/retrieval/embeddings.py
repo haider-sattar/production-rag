@@ -69,3 +69,48 @@ class EmbeddingService:
                 pieces.append(piece)
 
         return pieces
+
+    def embed_text(self, text: str) -> list[float]:
+        """
+        Convert one text string into a dense embedding vector.
+
+        Returns:
+            A list of floating-point values representing the semantic
+            meaning of the input text.
+        """
+
+        if not text.strip():
+            raise ValueError("Cannot embed empty text")
+
+        # SentenceTransformer internally:
+        # text -> tokenizer -> token IDs -> transformer -> pooled embedding
+        embedding = self.model.encode(
+            text,
+            normalize_embeddings=True,
+        )
+
+        # The model returns a NumPy array.
+        # Convert it into a normal Python list for easier storage/serialization.
+        return embedding.tolist()
+
+
+    def embed_batch(self, texts: list[str]) -> list[list[float]]:
+        """
+        Convert multiple texts into embeddings efficiently.
+
+        Batch processing is much faster than calling embed_text()
+        repeatedly for hundreds or thousands of document chunks.
+        """
+
+        if not texts:
+            return []
+
+        if any(not text.strip() for text in texts):
+            raise ValueError("Cannot embed empty text")
+
+        embeddings = self.model.encode(
+            texts,
+            normalize_embeddings=True,
+        )
+
+        return embeddings.tolist()

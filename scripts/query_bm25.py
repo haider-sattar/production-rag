@@ -1,37 +1,28 @@
 import argparse
 
-from rag.retrieval.embeddings import EmbeddingService
-from rag.retrieval.retriever import Retriever
+from rag.retrieval.bm25_retriever import BM25Retriever
 
 
 def main() -> None:
-    """
-    Development CLI for testing semantic retrieval.
-    """
-
     parser = argparse.ArgumentParser(
-        description="Search ingested documents using semantic similarity."
+        description="Search document chunks using BM25."
     )
 
     parser.add_argument(
         "query",
-        help="Question or search query.",
+        help="Search query",
     )
 
     parser.add_argument(
         "--top-k",
         type=int,
         default=5,
-        help="Number of chunks to retrieve.",
+        help="Number of results",
     )
 
     args = parser.parse_args()
 
-    embedding_service = EmbeddingService()
-
-    retriever = Retriever(
-        embedding_service=embedding_service,
-    )
+    retriever = BM25Retriever()
 
     results = retriever.search(
         query=args.query,
@@ -46,7 +37,7 @@ def main() -> None:
         print()
         print("=" * 70)
         print(f"Rank: {rank}")
-        print(f"Score: {result.score:.4f}")
+        print(f"BM25 score: {result.score:.4f}")
         print(f"File: {result.filename}")
         print(f"Page: {result.page_number}")
         print(f"Chunk: {result.chunk_index}")
