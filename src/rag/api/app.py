@@ -13,6 +13,7 @@ from starlette.concurrency import run_in_threadpool
 
 from rag.api.schemas import (
     CitationResponse,
+    DocumentDeleteResponse,
     DocumentUploadResponse,
     QueryRequest,
     QueryResponse,
@@ -290,6 +291,73 @@ def create_app(
             raise HTTPException(
                 status_code=500,
                 detail="Document ingestion failed",
+            ) from exc
+
+    @application.delete(
+        "/documents/{document_id}",
+        response_model=DocumentDeleteResponse,
+    )
+    def delete_document(
+        document_id: str,
+        ingestion_service: Annotated[
+            IngestionService,
+            Depends(get_ingestion_service),
+        ],
+        retriever: Annotated[
+            RerankingRetriever,
+            Depends(get_retriever),
+        ],
+    ) -> DocumentDeleteResponse:
+        """
+        Delete a document's vectors and invalidate its retrieval cache.
+        """
+
+        logger.info(
+            (
+                "document_delete_started "
+                "document_id=%s"
+            ),
+            document_id,
+        )
+
+        try:
+            ingestion_service.vector_store.delete_document(
+                document_id=document_id,
+            )
+
+            retriever.invalidate_document(
+                document_id=document_id,
+            )
+
+            logger.info(
+                (
+                    "document_delete_completed "
+                    "document_id=%s"
+                ),
+                document_id,
+            )
+
+            return DocumentDeleteResponse(
+                document_id=document_id,
+                deleted=True,
+            )
+
+        except HTTPException:
+            raise
+
+        except Exception as exc:
+            logger.exception(
+                (
+                    "document_delete_failed "
+                    "document_id=%s "
+                    "error_type=internal"
+                ),
+                document_id,
+            )
+
+            raise HTTPException(
+                status_code=500,
+                detail="Document deletion failed",
             ) from exc
 
     @application.post(

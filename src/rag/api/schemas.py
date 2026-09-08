@@ -31,6 +31,15 @@ class DocumentUploadResponse(BaseModel):
     chunk_count: int
 
 
+class DocumentDeleteResponse(BaseModel):
+    """
+    Confirmation returned after a document is removed.
+    """
+
+    document_id: str
+    deleted: bool
+
+
 class CitationResponse(BaseModel):
     """
     Validated citation metadata returned by the API.

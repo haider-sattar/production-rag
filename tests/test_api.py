@@ -1,4 +1,5 @@
 from pathlib import Path
+from unittest.mock import Mock
 from uuid import UUID
 
 from fastapi.testclient import TestClient
@@ -97,6 +98,9 @@ class FakeIngestionService:
     embedding, or talking to Qdrant.
     """
 
+    def __init__(self) -> None:
+        self.vector_store = Mock(spec=["delete_document"])
+
     def ingest_pdf(
         self,
         file_path: str | Path,
@@ -120,6 +124,7 @@ class FakeIngestionService:
 def create_test_client(
     retriever: FakeRetriever | None = None,
     generator: FakeGenerator | FailingGenerator | None = None,
+    ingestion_service: FakeIngestionService | None = None,
 ) -> TestClient:
     """
     Create a lightweight API instance without loading
@@ -143,7 +148,9 @@ def create_test_client(
     )
 
     app.state.ingestion_service = (
-        FakeIngestionService()
+        ingestion_service
+        if ingestion_service is not None
+        else FakeIngestionService()
     )
 
     return TestClient(app)
@@ -313,3 +320,86 @@ def test_upload_rejects_invalid_pdf_content() -> None:
     assert response.json() == {
         "detail": "Uploaded file is not a valid PDF",
     }
+
+def test_delete_document() -> None:
+    ingestion_service = FakeIngestionService()
+    retriever = Mock(spec=FakeRetriever)
+    calls = Mock()
+    calls.attach_mock(ingestion_service.vector_store, "vector_store")
+    calls.attach_mock(retriever, "retriever")
+
+    with create_test_client(
+        retriever=retriever,
+        ingestion_service=ingestion_service,
+    ) as client:
+        response = client.delete(
+            f"/documents/{TEST_DOCUMENT_ID}"
+        )
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "document_id": TEST_DOCUMENT_ID,
+        "deleted": True,
+    }
+    ingestion_service.vector_store.delete_document.assert_called_once_with(
+        document_id=TEST_DOCUMENT_ID,
+    )
+    retriever.invalidate_document.assert_called_once_with(
+        document_id=TEST_DOCUMENT_ID,
+    )
+    assert [entry[0] for entry in calls.mock_calls] == [
+        "vector_store.delete_document",
+        "retriever.invalidate_document",
+    ]
+
+
+def test_delete_handles_vector_store_failure() -> None:
+    ingestion_service = FakeIngestionService()
+    ingestion_service.vector_store.delete_document.side_effect = RuntimeError(
+        "Simulated Qdrant failure"
+    )
+    retriever = Mock(spec=FakeRetriever)
+
+    with create_test_client(
+        retriever=retriever,
+        ingestion_service=ingestion_service,
+    ) as client:
+        response = client.delete(
+            f"/documents/{TEST_DOCUMENT_ID}"
+        )
+
+    assert response.status_code == 500
+    assert response.json() == {
+        "detail": "Document deletion failed",
+    }
+    ingestion_service.vector_store.delete_document.assert_called_once_with(
+        document_id=TEST_DOCUMENT_ID,
+    )
+    retriever.invalidate_document.assert_not_called()
+
+
+def test_delete_handles_cache_invalidation_failure() -> None:
+    ingestion_service = FakeIngestionService()
+    retriever = Mock(spec=FakeRetriever)
+    retriever.invalidate_document.side_effect = RuntimeError(
+        "Simulated cache failure"
+    )
+
+    with create_test_client(
+        retriever=retriever,
+        ingestion_service=ingestion_service,
+    ) as client:
+        response = client.delete(
+            f"/documents/{TEST_DOCUMENT_ID}"
+        )
+
+    assert response.status_code == 500
+    assert response.json() == {
+        "detail": "Document deletion failed",
+    }
+    ingestion_service.vector_store.delete_document.assert_called_once_with(
+        document_id=TEST_DOCUMENT_ID,
+    )
+    retriever.invalidate_document.assert_called_once_with(
+        document_id=TEST_DOCUMENT_ID,
+    )
