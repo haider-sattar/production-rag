@@ -1,0 +1,749 @@
+[
+  {
+    "id": "q001",
+    "query": "What does the report mean by small AI?",
+    "query_type": "definition",
+    "difficulty": "easy",
+    "relevant_pages": [
+      15
+    ],
+    "answer_hint": "Small AI is affordable, accessible AI designed for everyday devices and limited-resource settings.",
+    "gold_evidence": "For LICs and MICs, small AI is affordable, accessible, designed for everyday devices, and capable of immediate impact with limited resources.",
+    "notes": "Exact phrase and localized definition; useful for BM25 and reranking.",
+    "reference_answer": "Small AI is affordable, accessible AI designed for everyday devices and limited-resource settings.",
+    "answerable": true
+  },
+  {
+    "id": "q002",
+    "query": "How does the report broadly define artificial intelligence?",
+    "query_type": "definition",
+    "difficulty": "easy",
+    "relevant_pages": [
+      24
+    ],
+    "answer_hint": "AI is a branch of computer science focused on systems that perform tasks normally requiring human intelligence.",
+    "gold_evidence": "AI is defined as a branch of computer science dedicated to creating systems capable of tasks that typically require human intelligence.",
+    "notes": "Source-like definition suitable as an easy retrieval baseline.",
+    "reference_answer": "AI is a branch of computer science focused on systems that perform tasks normally requiring human intelligence.",
+    "answerable": true
+  },
+  {
+    "id": "q003",
+    "query": "How does generative AI extend the capabilities of traditional task-focused AI?",
+    "query_type": "semantic",
+    "difficulty": "medium",
+    "relevant_pages": [
+      24,
+      25
+    ],
+    "answer_hint": "Traditional AI emphasizes analysis and prediction, while GenAI can interpret prompts and create text, images, audio, video, code, 3D models, and synthetic data.",
+    "gold_evidence": "The report contrasts traditional analysis and prediction with GenAI's ability to generate many forms of new content from natural-language prompts.",
+    "notes": "Paraphrased adjacent-page concept; useful for dense retrieval and reranking.",
+    "reference_answer": "Traditional AI emphasizes analysis and prediction, while GenAI can interpret prompts and create text, images, audio, video, code, 3D models, and synthetic data.",
+    "answerable": true
+  },
+  {
+    "id": "q004",
+    "query": "What is multimodal AI according to the report?",
+    "query_type": "exact_term",
+    "difficulty": "easy",
+    "relevant_pages": [
+      26
+    ],
+    "answer_hint": "It is AI that processes and synthesizes multiple data types simultaneously, such as video, audio, subtitles, text, and images.",
+    "gold_evidence": "Multimodal systems process and synthesize information from multiple data types at the same time.",
+    "notes": "Exact technical term with a compact definition; strong lexical case.",
+    "reference_answer": "It is AI that processes and synthesizes multiple data types simultaneously, such as video, audio, subtitles, text, and images.",
+    "answerable": true
+  },
+  {
+    "id": "q005",
+    "query": "What capabilities let agentic AI operate with less human guidance than conventional AI systems?",
+    "query_type": "semantic",
+    "difficulty": "hard",
+    "relevant_pages": [
+      26
+    ],
+    "answer_hint": "It can set subgoals, resolve conflicts, adjust strategies from feedback, perform multistep reasoning, and orchestrate workflows.",
+    "gold_evidence": "Agentic AI goes beyond chat by autonomously pursuing goals, adapting its strategy, and coordinating multistep work.",
+    "notes": "Conceptual paraphrase intended to favor dense retrieval.",
+    "reference_answer": "It can set subgoals, resolve conflicts, adjust strategies from feedback, perform multistep reasoning, and orchestrate workflows.",
+    "answerable": true
+  },
+  {
+    "id": "q006",
+    "query": "What is physical AI, and how does it obtain information from the real world?",
+    "query_type": "definition",
+    "difficulty": "medium",
+    "relevant_pages": [
+      27
+    ],
+    "answer_hint": "Physical AI includes systems such as autonomous vehicles and robots that capture environmental data through sensors or IoT devices.",
+    "gold_evidence": "Physical AI, including autonomous vehicles and robotics, captures data directly from its environment through sensors or Internet of Things devices.",
+    "notes": "Definition plus examples; useful for dense and hybrid retrieval.",
+    "reference_answer": "Physical AI includes systems such as autonomous vehicles and robots that capture environmental data through sensors or IoT devices.",
+    "answerable": true
+  },
+  {
+    "id": "q007",
+    "query": "What are the four foundational 4Cs of AI readiness?",
+    "query_type": "exact_term",
+    "difficulty": "easy",
+    "relevant_pages": [
+      11,
+      16,
+      24,
+      42
+    ],
+    "answer_hint": "Connectivity, compute, context, and competency.",
+    "gold_evidence": "The report names connectivity, compute, context, and competency as the foundational 4Cs.",
+    "notes": "Exact framework name; strong BM25 case.",
+    "reference_answer": "Connectivity, compute, context, and competency.",
+    "answerable": true
+  },
+  {
+    "id": "q008",
+    "query": "Why can developing countries benefit from AI without recreating foundational models from the ground up?",
+    "query_type": "cause",
+    "difficulty": "hard",
+    "relevant_pages": [
+      15,
+      23
+    ],
+    "answer_hint": "Open-source technologies allow them to adapt existing systems to local contexts instead of reinventing foundational technology.",
+    "gold_evidence": "Open-source technologies democratize participation by allowing developing countries to tailor AI to local contexts without reinventing foundational technologies.",
+    "notes": "Causal paraphrase with limited exact overlap; favors dense retrieval.",
+    "reference_answer": "Open-source technologies allow them to adapt existing systems to local contexts instead of reinventing foundational technology.",
+    "answerable": true
+  },
+  {
+    "id": "q009",
+    "query": "What two properties make AI fundamentally different from earlier general-purpose technologies such as electricity and computers?",
+    "query_type": "comparison",
+    "difficulty": "hard",
+    "relevant_pages": [
+      28
+    ],
+    "answer_hint": "AI learns and adapts, and it depends heavily on large data sets for training and operation.",
+    "gold_evidence": "The report identifies learning and adaptability, plus data dependency, as AI's two key differences from earlier general-purpose technologies.",
+    "notes": "High-value conceptual comparison suited to dense retrieval.",
+    "reference_answer": "AI learns and adapts, and it depends heavily on large data sets for training and operation.",
+    "answerable": true
+  },
+  {
+    "id": "q010",
+    "query": "How many people, countries, and years were involved in GenAI tool uptake shortly after ChatGPT launched?",
+    "query_type": "numeric",
+    "difficulty": "medium",
+    "relevant_pages": [
+      24
+    ],
+    "answer_hint": "More than half a billion people in over 200 countries used GenAI tools within two years.",
+    "gold_evidence": "GenAI tools were used by more than half a billion people in more than 200 countries within two years of ChatGPT's launch.",
+    "notes": "Multiple exact quantities; strong sparse-retrieval test.",
+    "reference_answer": "More than half a billion people in over 200 countries used GenAI tools within two years.",
+    "answerable": true
+  },
+  {
+    "id": "q011",
+    "query": "What shares of notable AI models, AI start-ups, and cumulative AI start-up venture capital funding belonged to high-income countries in July 2025?",
+    "query_type": "numeric",
+    "difficulty": "medium",
+    "relevant_pages": [
+      15
+    ],
+    "answer_hint": "87 percent of notable models, 86 percent of start-ups, and 91 percent of cumulative venture capital funding.",
+    "gold_evidence": "HICs accounted for 87 percent of notable AI models, 86 percent of AI start-ups, and 91 percent of cumulative AI start-up venture capital funding.",
+    "notes": "Dense cluster of percentages and entities; favors BM25 and hybrid.",
+    "reference_answer": "87 percent of notable models, 86 percent of start-ups, and 91 percent of cumulative venture capital funding.",
+    "answerable": true
+  },
+  {
+    "id": "q012",
+    "query": "How large was the ChatGPT traffic gap between middle-income and low-income countries in mid-2025?",
+    "query_type": "comparison",
+    "difficulty": "medium",
+    "relevant_pages": [
+      16,
+      24
+    ],
+    "answer_hint": "MICs generated over 40 percent of global traffic, while LICs generated less than 1 percent.",
+    "gold_evidence": "More than 40 percent of global ChatGPT traffic came from MICs, compared with less than 1 percent from LICs.",
+    "notes": "Numeric income-group comparison; useful for lexical and hybrid retrieval.",
+    "reference_answer": "MICs generated over 40 percent of global traffic, while LICs generated less than 1 percent.",
+    "answerable": true
+  },
+  {
+    "id": "q013",
+    "query": "Between 2022 and 2024, which income group recorded the largest percentage-point rise in internet use, and what level did it reach?",
+    "query_type": "numeric",
+    "difficulty": "hard",
+    "relevant_pages": [
+      16,
+      54
+    ],
+    "answer_hint": "LMICs rose the most, by 5 percentage points, reaching 54 percent.",
+    "gold_evidence": "Internet use in LMICs increased by 5 percentage points to 54 percent, more than the increases in the other income groups.",
+    "notes": "Requires selecting the maximum from several figures.",
+    "reference_answer": "LMICs rose the most, by 5 percentage points, reaching 54 percent.",
+    "answerable": true
+  },
+  {
+    "id": "q014",
+    "query": "What was annual data traffic per capita in 2023 across HICs, UMICs, LMICs, and LICs?",
+    "query_type": "numeric",
+    "difficulty": "easy",
+    "relevant_pages": [
+      16,
+      47,
+      56
+    ],
+    "answer_hint": "About 1,400 GB, 400 GB, 100 GB, and 5 GB, respectively.",
+    "gold_evidence": "Per-capita data traffic reached 1,400 GB in HICs, 400 GB in UMICs, 100 GB in LMICs, and 5 GB in LICs.",
+    "notes": "Exact acronyms and numbers make this a strong BM25 case.",
+    "reference_answer": "About 1,400 GB, 400 GB, 100 GB, and 5 GB, respectively.",
+    "answerable": true
+  },
+  {
+    "id": "q015",
+    "query": "What proportion of each income group had 5G coverage in 2024?",
+    "query_type": "numeric",
+    "difficulty": "easy",
+    "relevant_pages": [
+      16,
+      49
+    ],
+    "answer_hint": "84 percent in HICs, 65 percent in UMICs, 35 percent in LMICs, and 4 percent in LICs.",
+    "gold_evidence": "The report lists 2024 5G coverage of 84, 65, 35, and 4 percent for HICs, UMICs, LMICs, and LICs.",
+    "notes": "Exact numeric lookup with repeated group labels.",
+    "reference_answer": "84 percent in HICs, 65 percent in UMICs, 35 percent in LMICs, and 4 percent in LICs.",
+    "answerable": true
+  },
+  {
+    "id": "q016",
+    "query": "Which parts of the connectivity divide improved, and which worsened between richer and poorer countries?",
+    "query_type": "comparison",
+    "difficulty": "hard",
+    "relevant_pages": [
+      47
+    ],
+    "answer_hint": "Access gaps narrowed, but affordability and quality gaps, including speed and data use, widened.",
+    "gold_evidence": "The connectivity key messages say internet access gaps narrowed while affordability and quality gaps widened.",
+    "notes": "Strong semantic reformulation for dense and reranked retrieval.",
+    "reference_answer": "Access gaps narrowed, but affordability and quality gaps, including speed and data use, widened.",
+    "answerable": true
+  },
+  {
+    "id": "q017",
+    "query": "What are nonterrestrial networks (NTNs), and what kinds of platforms do they include?",
+    "query_type": "exact_term",
+    "difficulty": "medium",
+    "relevant_pages": [
+      48
+    ],
+    "answer_hint": "They are wireless systems using equipment in the air or orbit, including satellite and other airborne platforms.",
+    "gold_evidence": "NTNs use airborne or orbital equipment to extend connectivity, with satellites playing a central role in filling coverage gaps.",
+    "notes": "Rare acronym and technical terminology favor sparse retrieval.",
+    "reference_answer": "They are wireless systems using equipment in the air or orbit, including satellite and other airborne platforms.",
+    "answerable": true
+  },
+  {
+    "id": "q018",
+    "query": "How did 5G coverage change in LMICs from 2022 to 2024, and how did their 2024 level compare with LICs?",
+    "query_type": "comparison",
+    "difficulty": "medium",
+    "relevant_pages": [
+      48,
+      49
+    ],
+    "answer_hint": "LMIC coverage rose from 5 percent to 35 percent; LIC coverage was only 4 percent in 2024.",
+    "gold_evidence": "LMIC 5G coverage increased from 5 percent in 2022 to 35 percent in 2024, while LIC coverage reached 4 percent.",
+    "notes": "Exact percentages and acronyms create a strong hybrid case.",
+    "reference_answer": "LMIC coverage rose from 5 percent to 35 percent; LIC coverage was only 4 percent in 2024.",
+    "answerable": true
+  },
+  {
+    "id": "q019",
+    "query": "What two statistics describe the expansion of commercial communications satellites since 2015?",
+    "query_type": "numeric",
+    "difficulty": "medium",
+    "relevant_pages": [
+      48,
+      49
+    ],
+    "answer_hint": "Their number increased more than fourteenfold, and LEO satellites now make up 90 percent of communications and connectivity satellites in orbit.",
+    "gold_evidence": "Commercial communications satellites increased more than 14 times since 2015, with LEO satellites accounting for 90 percent of the relevant satellites in orbit.",
+    "notes": "Rare term LEO plus two precise statistics.",
+    "reference_answer": "Their number increased more than fourteenfold, and LEO satellites now make up 90 percent of communications and connectivity satellites in orbit.",
+    "answerable": true
+  },
+  {
+    "id": "q020",
+    "query": "What policy levers can expand broadband infrastructure while making devices more affordable?",
+    "query_type": "multi_factor",
+    "difficulty": "hard",
+    "relevant_pages": [
+      48,
+      59
+    ],
+    "answer_hint": "Liberalize investment, promote competition, streamline permits and rights-of-way, stabilize regulation and spectrum policy, share infrastructure, use access points and subsidies, lower device taxes, and offer financing.",
+    "gold_evidence": "The report combines investment and competition reforms with streamlined deployment, infrastructure sharing, subsidies, lower taxes, and innovative device financing.",
+    "notes": "Long paraphrased policy list; strong dense-plus-reranker test.",
+    "reference_answer": "Liberalize investment, promote competition, streamline permits and rights-of-way, stabilize regulation and spectrum policy, share infrastructure, use access points and subsidies, lower device taxes, and offer financing.",
+    "answerable": true
+  },
+  {
+    "id": "q021",
+    "query": "How does the report define compute in the AI context?",
+    "query_type": "definition",
+    "difficulty": "easy",
+    "relevant_pages": [
+      62
+    ],
+    "answer_hint": "Compute is the ability to store, process, and transfer data at scale.",
+    "gold_evidence": "Compute is defined as the ability to store, process, and transfer data at scale.",
+    "notes": "Compact exact definition useful as a baseline.",
+    "reference_answer": "Compute is the ability to store, process, and transfer data at scale.",
+    "answerable": true
+  },
+  {
+    "id": "q022",
+    "query": "How concentrated were secure internet servers in 2024, and how did US availability per person compare with typical MICs and LICs?",
+    "query_type": "comparison",
+    "difficulty": "hard",
+    "relevant_pages": [
+      61
+    ],
+    "answer_hint": "The United States hosted 50 percent and other HICs 41 percent; per person, the United States had 200 times typical MIC availability and 20,000 times LIC availability.",
+    "gold_evidence": "The United States hosted half of secure servers, other HICs hosted 41 percent, and US per-capita availability was 200 times that of typical MICs and 20,000 times that of LICs.",
+    "notes": "Multiple exact figures make this a demanding lexical test.",
+    "reference_answer": "The United States hosted 50 percent and other HICs 41 percent; per person, the United States had 200 times typical MIC availability and 20,000 times LIC availability.",
+    "answerable": true
+  },
+  {
+    "id": "q023",
+    "query": "How were the world's top 500 HPC systems and their capacity distributed?",
+    "query_type": "exact_term",
+    "difficulty": "medium",
+    "relevant_pages": [
+      61,
+      68
+    ],
+    "answer_hint": "HICs hosted 86 percent of the systems and 97 percent of capacity; excluding China and India, MICs had 3 percent of systems and 1 percent of capacity.",
+    "gold_evidence": "As of June 2025, HICs hosted 86 percent of top-500 HPC systems and 97 percent of their capacity; MICs excluding China and India hosted 3 percent and 1 percent, respectively.",
+    "notes": "Rare acronym HPC and exact percentages strongly favor BM25.",
+    "reference_answer": "HICs hosted 86 percent of the systems and 97 percent of capacity; excluding China and India, MICs had 3 percent of systems and 1 percent of capacity.",
+    "answerable": true
+  },
+  {
+    "id": "q024",
+    "query": "How was global co-location data-center capacity divided by income group in June 2025?",
+    "query_type": "numeric",
+    "difficulty": "easy",
+    "relevant_pages": [
+      61
+    ],
+    "answer_hint": "77 percent in HICs, 18 percent in UMICs, 5 percent in LMICs, and less than 0.1 percent in LICs.",
+    "gold_evidence": "Co-location capacity was distributed 77 percent, 18 percent, 5 percent, and below 0.1 percent across HICs, UMICs, LMICs, and LICs.",
+    "notes": "Highly lexical numeric fact pattern.",
+    "reference_answer": "77 percent in HICs, 18 percent in UMICs, 5 percent in LMICs, and less than 0.1 percent in LICs.",
+    "answerable": true
+  },
+  {
+    "id": "q025",
+    "query": "What share of global cloud-computing exports came from the United States, and where did its 2023 exports go by income group?",
+    "query_type": "numeric",
+    "difficulty": "hard",
+    "relevant_pages": [
+      61,
+      69
+    ],
+    "answer_hint": "The United States supplied 87 percent globally; its exports went 84 percent to HICs, 14 percent to UMICs, 2 percent to LMICs, and 0 percent to LICs.",
+    "gold_evidence": "The United States accounted for 87 percent of global cloud exports, distributed in 2023 as 84, 14, 2, and 0 percent across the four income groups.",
+    "notes": "Numbers, date, and group names favor BM25 and hybrid.",
+    "reference_answer": "The United States supplied 87 percent globally; its exports went 84 percent to HICs, 14 percent to UMICs, 2 percent to LMICs, and 0 percent to LICs.",
+    "answerable": true
+  },
+  {
+    "id": "q026",
+    "query": "Why can domestic data centers be economically attractive yet difficult or risky for developing countries?",
+    "query_type": "multi_factor",
+    "difficulty": "hard",
+    "relevant_pages": [
+      61,
+      70
+    ],
+    "answer_hint": "They can support growth, jobs, and digital sovereignty, but need affordable energy, strong connectivity, and sufficient demand and may strain grids, raise land costs, and harm the environment.",
+    "gold_evidence": "The report pairs growth, employment, and sovereignty benefits with demanding energy, infrastructure, demand, land, grid, and environmental requirements.",
+    "notes": "Semantically reframed trade-off for dense retrieval and reranking.",
+    "reference_answer": "They can support growth, jobs, and digital sovereignty, but need affordable energy, strong connectivity, and sufficient demand and may strain grids, raise land costs, and harm the environment.",
+    "answerable": true
+  },
+  {
+    "id": "q027",
+    "query": "What market barriers commonly discourage private investment in compute infrastructure?",
+    "query_type": "multi_factor",
+    "difficulty": "medium",
+    "relevant_pages": [
+      62
+    ],
+    "answer_hint": "High entry costs, weak energy and digital infrastructure, limited demand, regulatory uncertainty, scarce cloud expertise, and coordination failures.",
+    "gold_evidence": "The report lists entry costs, infrastructure constraints, limited local demand, regulatory uncertainty, lack of cloud expertise, and coordination failures.",
+    "notes": "Compact multi-factor passage paraphrased in the query.",
+    "reference_answer": "High entry costs, weak energy and digital infrastructure, limited demand, regulatory uncertainty, scarce cloud expertise, and coordination failures.",
+    "answerable": true
+  },
+  {
+    "id": "q028",
+    "query": "How do owning compute infrastructure and renting cloud capacity differ in cost, flexibility, control, and operational burden?",
+    "query_type": "comparison",
+    "difficulty": "hard",
+    "relevant_pages": [
+      65,
+      66
+    ],
+    "answer_hint": "Ownership provides control and exclusive access but requires large capital and management; cloud reduces upfront cost and improves scalability but can bring lock-in, control, long-run cost, and egress concerns.",
+    "gold_evidence": "The purchasing and cloud sections contrast exclusive control and capital burden with scalable rented access and risks including lock-in and egress costs.",
+    "notes": "Two-passage semantic comparison ideal for hybrid retrieval plus reranking.",
+    "reference_answer": "Ownership provides control and exclusive access but requires large capital and management; cloud reduces upfront cost and improves scalability but can bring lock-in, control, long-run cost, and egress concerns.",
+    "answerable": true
+  },
+  {
+    "id": "q029",
+    "query": "Why can physical distance from a data center degrade a real-time AI application?",
+    "query_type": "cause",
+    "difficulty": "medium",
+    "relevant_pages": [
+      66
+    ],
+    "answer_hint": "Longer distance increases latency, which can slow or degrade live applications such as speech recognition and robotics control.",
+    "gold_evidence": "Greater distance from the hosting data center increases latency and can degrade real-time AI experiences.",
+    "notes": "Cause-effect paraphrase useful for dense retrieval.",
+    "reference_answer": "Longer distance increases latency, which can slow or degrade live applications such as speech recognition and robotics control.",
+    "answerable": true
+  },
+  {
+    "id": "q030",
+    "query": "Which workload characteristics favor purchased infrastructure, and which favor cloud computing?",
+    "query_type": "comparison",
+    "difficulty": "hard",
+    "relevant_pages": [
+      66
+    ],
+    "answer_hint": "Purchase suits strict compliance, specialized performance, stable workloads, and capable operators; cloud suits variable workloads, experimentation, rapid deployment, scaling, and lower operational overhead.",
+    "gold_evidence": "The report contrasts purchase for predictable, specialized, compliance-heavy workloads with cloud for flexibility, experimentation, fast deployment, and variable demand.",
+    "notes": "Semantic comparison designed for dense retrieval and reranking.",
+    "reference_answer": "Purchase suits strict compliance, specialized performance, stable workloads, and capable operators; cloud suits variable workloads, experimentation, rapid deployment, scaling, and lower operational overhead.",
+    "answerable": true
+  },
+  {
+    "id": "q031",
+    "query": "How large is the basic digital-skills gap between high-income and low-income countries?",
+    "query_type": "comparison",
+    "difficulty": "medium",
+    "relevant_pages": [
+      17,
+      103
+    ],
+    "answer_hint": "About 66 percent of people in HICs have basic digital skills, compared with less than 5 percent in LICs.",
+    "gold_evidence": "Basic digital skills are held by 66 percent of people in HICs but by less than 5 percent in LICs.",
+    "notes": "Income-group comparison with exact percentages.",
+    "reference_answer": "About 66 percent of people in HICs have basic digital skills, compared with less than 5 percent in LICs.",
+    "answerable": true
+  },
+  {
+    "id": "q032",
+    "query": "Which countries held the largest shares of the world's ICT specialists in 2023?",
+    "query_type": "named_entity",
+    "difficulty": "easy",
+    "relevant_pages": [
+      104
+    ],
+    "answer_hint": "China and the United States each held 21 percent, India 15 percent, the United Kingdom and Russia 5 percent each, and Germany 4 percent.",
+    "gold_evidence": "ICT specialists were concentrated in China and the United States at 21 percent each, India at 15 percent, the United Kingdom and Russia at 5 percent, and Germany at 4 percent.",
+    "notes": "Named entities and numbers strongly favor lexical retrieval.",
+    "reference_answer": "China and the United States each held 21 percent, India 15 percent, the United Kingdom and Russia 5 percent each, and Germany 4 percent.",
+    "answerable": true
+  },
+  {
+    "id": "q033",
+    "query": "What evidence suggests that university ICT curricula in Africa are not keeping pace with technology?",
+    "query_type": "numeric",
+    "difficulty": "medium",
+    "relevant_pages": [
+      105
+    ],
+    "answer_hint": "Forty percent of surveyed universities had not updated ICT curricula in more than five years, and 3 percent had never updated them.",
+    "gold_evidence": "A survey found that 40 percent of African universities had not updated ICT curricula for over five years and 3 percent had never done so.",
+    "notes": "Paraphrased premise with distinctive figures.",
+    "reference_answer": "Forty percent of surveyed universities had not updated ICT curricula in more than five years, and 3 percent had never updated them.",
+    "answerable": true
+  },
+  {
+    "id": "q034",
+    "query": "Why do infrastructure constraints make digital-skills development especially difficult in low-income countries?",
+    "query_type": "cause",
+    "difficulty": "hard",
+    "relevant_pages": [
+      105
+    ],
+    "answer_hint": "Reliable internet, personal computers, and specialized AI or data-science labs are scarce, limiting hands-on practice and technical learning.",
+    "gold_evidence": "Limited internet, computer access, and AI labs hinder skills development; fewer than 30 percent of African institutions have specialized AI, data-science, or computer-aided-design facilities.",
+    "notes": "Causal paraphrase combining localized infrastructure factors.",
+    "reference_answer": "Reliable internet, personal computers, and specialized AI or data-science labs are scarce, limiting hands-on practice and technical learning.",
+    "answerable": true
+  },
+  {
+    "id": "q035",
+    "query": "What did the report say about Coursera's global reach and female participation by April 2025?",
+    "query_type": "numeric",
+    "difficulty": "medium",
+    "relevant_pages": [
+      105
+    ],
+    "answer_hint": "Coursera exceeded 170 million learners, about 5 percent of the global workforce; women were 46 percent of users in 2024, up from 43 percent in 2023.",
+    "gold_evidence": "Global Coursera learners exceeded 170 million, equal to 5 percent of the workforce, while female participation rose from 43 to 46 percent.",
+    "notes": "Platform name, dates, and percentages make a strong sparse test.",
+    "reference_answer": "Coursera exceeded 170 million learners, about 5 percent of the global workforce; women were 46 percent of users in 2024, up from 43 percent in 2023.",
+    "answerable": true
+  },
+  {
+    "id": "q036",
+    "query": "Among people claiming GenAI skills, how prominent are ICT professionals in HICs versus LMICs?",
+    "query_type": "comparison",
+    "difficulty": "medium",
+    "relevant_pages": [
+      106
+    ],
+    "answer_hint": "ICT professionals account for one-quarter of such users in HICs and one-third in LMICs.",
+    "gold_evidence": "One-quarter of users claiming GenAI skills in HICs are ICT professionals, compared with one-third in LMICs.",
+    "notes": "Exact occupational and income-group comparison.",
+    "reference_answer": "ICT professionals account for one-quarter of such users in HICs and one-third in LMICs.",
+    "answerable": true
+  },
+  {
+    "id": "q037",
+    "query": "Why does the report conclude that GenAI adoption remains nascent even in highly exposed non-ICT occupations?",
+    "query_type": "cause",
+    "difficulty": "hard",
+    "relevant_pages": [
+      106
+    ],
+    "answer_hint": "Only about 0.5 to 1.5 percent of profiles in those roles claim GenAI skills, showing limited penetration and minimal effects on skills demand and supply.",
+    "gold_evidence": "GenAI skill penetration in exposed non-ICT roles is typically only 0.5 to 1.5 percent, supporting the conclusion that adoption remains limited.",
+    "notes": "Inference grounded in a precise local passage; favors dense retrieval plus reranking.",
+    "reference_answer": "Only about 0.5 to 1.5 percent of profiles in those roles claim GenAI skills, showing limited penetration and minimal effects on skills demand and supply.",
+    "answerable": true
+  },
+  {
+    "id": "q038",
+    "query": "Which countries experienced the most severe high-skilled talent outflows relative to inflows?",
+    "query_type": "named_entity",
+    "difficulty": "medium",
+    "relevant_pages": [
+      17,
+      107
+    ],
+    "answer_hint": "Bangladesh, Lebanon, Nigeria, and Ukraine had outflows three to four times higher than inflows.",
+    "gold_evidence": "LinkedIn data show talent outflows three to four times inflows in Bangladesh, Lebanon, Nigeria, and Ukraine.",
+    "notes": "Country names and ratio language benefit lexical retrieval.",
+    "reference_answer": "Bangladesh, Lebanon, Nigeria, and Ukraine had outflows three to four times higher than inflows.",
+    "answerable": true
+  },
+  {
+    "id": "q039",
+    "query": "How does the birthplace of elite AI researchers compare with where they ultimately work?",
+    "query_type": "comparison",
+    "difficulty": "hard",
+    "relevant_pages": [
+      107
+    ],
+    "answer_hint": "In 2022, 28 percent originated in the United States, 26 percent in China, and 7 percent in India, but 57 percent ultimately worked in the United States, 12 percent in China, and almost none in India.",
+    "gold_evidence": "The Global AI Talent Tracker contrasts researcher origins of 28, 26, and 7 percent with destinations of 57, 12, and almost zero percent for the United States, China, and India.",
+    "notes": "Multi-number named-entity comparison ideal for hybrid retrieval.",
+    "reference_answer": "In 2022, 28 percent originated in the United States, 26 percent in China, and 7 percent in India, but 57 percent ultimately worked in the United States, 12 percent in China, and almost none in India.",
+    "answerable": true
+  },
+  {
+    "id": "q040",
+    "query": "What interconnected barriers keep developing countries from cultivating and retaining digital talent?",
+    "query_type": "multi_factor",
+    "difficulty": "hard",
+    "relevant_pages": [
+      108,
+      109
+    ],
+    "answer_hint": "Weak internet, compute, and labs; poor industry alignment; high training costs and credit constraints; underinvestment by firms; gender barriers; and brain drain reinforce one another.",
+    "gold_evidence": "The report links infrastructure gaps, weak education-industry coordination, financial constraints, poaching fears, sociocultural barriers, and migration into a vicious cycle.",
+    "notes": "Two-page synthesis with substantial paraphrase; strong dense-plus-reranker test.",
+    "reference_answer": "Weak internet, compute, and labs; poor industry alignment; high training costs and credit constraints; underinvestment by firms; gender barriers; and brain drain reinforce one another.",
+    "answerable": true
+  },
+  {
+    "id": "q041",
+    "query": "What device-access measures are recommended for countries with low AI readiness?",
+    "query_type": "multi_factor",
+    "difficulty": "medium",
+    "relevant_pages": [
+      59,
+      109
+    ],
+    "answer_hint": "Reduce device taxes, provide targeted subsidies, and partner with manufacturers and internet providers on innovative financing.",
+    "gold_evidence": "Low-readiness countries can lower taxes, introduce targeted subsidies, and develop financing schemes with device makers and internet providers.",
+    "notes": "Localized policy list phrased semantically.",
+    "reference_answer": "Reduce device taxes, provide targeted subsidies, and partner with manufacturers and internet providers on innovative financing.",
+    "answerable": true
+  },
+  {
+    "id": "q042",
+    "query": "Which Malaysian initiative illustrates how digital-literacy programs can be adapted to local language and needs?",
+    "query_type": "named_entity",
+    "difficulty": "easy",
+    "relevant_pages": [
+      109
+    ],
+    "answer_hint": "The Saya Digital initiative.",
+    "gold_evidence": "Malaysia's Saya Digital initiative uses native languages and addresses local challenges to improve accessibility and impact.",
+    "notes": "Rare program name creates a useful BM25 case.",
+    "reference_answer": "The Saya Digital initiative.",
+    "answerable": true
+  },
+  {
+    "id": "q043",
+    "query": "How can medium-readiness countries make workforce training more responsive to changing digital-skill needs?",
+    "query_type": "multi_factor",
+    "difficulty": "hard",
+    "relevant_pages": [
+      109
+    ],
+    "answer_hint": "Support affordable SME training, expand instructor capacity, build industry-education partnerships, and regularly update curricula using skills diagnostics.",
+    "gold_evidence": "Recommendations include SME upskilling support, more instructors, industry-specific partnerships, and regular curriculum updates based on demand-and-supply assessments.",
+    "notes": "Broad semantic policy query suited to dense retrieval.",
+    "reference_answer": "Support affordable SME training, expand instructor capacity, build industry-education partnerships, and regularly update curricula using skills diagnostics.",
+    "answerable": true
+  },
+  {
+    "id": "q044",
+    "query": "Why should high-readiness countries help universities and start-ups access compute and training data?",
+    "query_type": "cause",
+    "difficulty": "hard",
+    "relevant_pages": [
+      110
+    ],
+    "answer_hint": "State-of-the-art AI requires resources universities and start-ups often lack, while access supports research, innovation, commercialization, competition, and positive spillovers.",
+    "gold_evidence": "Industry increasingly dominates AI research because advanced models require vast compute and data; targeted access can keep universities and start-ups competitive and generate spillovers.",
+    "notes": "Causal policy rationale with semantic wording.",
+    "reference_answer": "State-of-the-art AI requires resources universities and start-ups often lack, while access supports research, innovation, commercialization, competition, and positive spillovers.",
+    "answerable": true
+  },
+  {
+    "id": "q045",
+    "query": "What policies can high-readiness countries use to retain domestic digital talent and attract experts from abroad?",
+    "query_type": "multi_factor",
+    "difficulty": "medium",
+    "relevant_pages": [
+      110
+    ],
+    "answer_hint": "Offer competitive salaries, grants, tax incentives, and career opportunities; streamline work and digital-nomad visas; and foster international collaborations and AI hubs.",
+    "gold_evidence": "The report recommends stronger retention incentives alongside streamlined visas, research support, tax incentives, international partnerships, and AI hubs.",
+    "notes": "Multi-factor policy retrieval with dense and lexical cues.",
+    "reference_answer": "Offer competitive salaries, grants, tax incentives, and career opportunities; streamline work and digital-nomad visas; and foster international collaborations and AI hubs.",
+    "answerable": true
+  },
+  {
+    "id": "q046",
+    "query": "Who won the 2022 FIFA World Cup?",
+    "query_type": "unanswerable",
+    "difficulty": "easy",
+    "relevant_pages": [],
+    "answer_hint": null,
+    "gold_evidence": null,
+    "notes": "Negative-control question for refusal behavior; outside the report's scope.",
+    "reference_answer": null,
+    "answerable": false
+  },
+  {
+    "id": "q047",
+    "query": "What is the capital city of Australia?",
+    "query_type": "unanswerable",
+    "difficulty": "easy",
+    "relevant_pages": [],
+    "answer_hint": null,
+    "gold_evidence": null,
+    "notes": "Negative-control question for refusal behavior; unrelated general knowledge.",
+    "reference_answer": null,
+    "answerable": false
+  },
+  {
+    "id": "q048",
+    "query": "Who wrote the novel Pride and Prejudice?",
+    "query_type": "unanswerable",
+    "difficulty": "easy",
+    "relevant_pages": [],
+    "answer_hint": null,
+    "gold_evidence": null,
+    "notes": "Negative-control question for refusal behavior; unrelated literary knowledge.",
+    "reference_answer": null,
+    "answerable": false
+  },
+  {
+    "id": "q049",
+    "query": "What is the chemical symbol for gold?",
+    "query_type": "unanswerable",
+    "difficulty": "easy",
+    "relevant_pages": [],
+    "answer_hint": null,
+    "gold_evidence": null,
+    "notes": "Negative-control question for refusal behavior; unrelated science knowledge.",
+    "reference_answer": null,
+    "answerable": false
+  },
+  {
+    "id": "q050",
+    "query": "Which planet is closest to the Sun?",
+    "query_type": "unanswerable",
+    "difficulty": "easy",
+    "relevant_pages": [],
+    "answer_hint": null,
+    "gold_evidence": null,
+    "notes": "Negative-control question for refusal behavior; unrelated astronomy knowledge.",
+    "reference_answer": null,
+    "answerable": false
+  },
+  {
+    "id": "q051",
+    "query": "What year did the Titanic sink?",
+    "query_type": "unanswerable",
+    "difficulty": "easy",
+    "relevant_pages": [],
+    "answer_hint": null,
+    "gold_evidence": null,
+    "notes": "Negative-control question for refusal behavior; unrelated historical knowledge.",
+    "reference_answer": null,
+    "answerable": false
+  },
+  {
+    "id": "q052",
+    "query": "What is the boiling point of water at sea level in degrees Celsius?",
+    "query_type": "unanswerable",
+    "difficulty": "easy",
+    "relevant_pages": [],
+    "answer_hint": null,
+    "gold_evidence": null,
+    "notes": "Negative-control question for refusal behavior; unrelated scientific fact.",
+    "reference_answer": null,
+    "answerable": false
+  },
+  {
+    "id": "q053",
+    "query": "Who painted the Mona Lisa?",
+    "query_type": "unanswerable",
+    "difficulty": "easy",
+    "relevant_pages": [],
+    "answer_hint": null,
+    "gold_evidence": null,
+    "notes": "Negative-control question for refusal behavior; unrelated art-history knowledge.",
+    "reference_answer": null,
+    "answerable": false
+  }
+]
