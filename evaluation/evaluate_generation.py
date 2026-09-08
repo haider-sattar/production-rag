@@ -5,7 +5,7 @@ import time
 from collections.abc import Callable
 from pathlib import Path
 from statistics import fmean
-from typing import Any, TypeVar
+from typing import Any
 
 from dotenv import load_dotenv
 
@@ -111,7 +111,6 @@ JUDGE_DIMENSIONS = (
     "citation_support",
 )
 
-T = TypeVar("T")
 
 
 class APIRateLimiter:
@@ -155,7 +154,7 @@ def load_questions(path: Path) -> list[dict[str, Any]]:
         questions = json.load(file)
 
     if not isinstance(questions, list):
-        raise ValueError("Evaluation dataset must be a JSON list.")
+        raise TypeError("Evaluation dataset must be a JSON list.")
 
     required_fields = {
         "id",
@@ -167,7 +166,7 @@ def load_questions(path: Path) -> list[dict[str, Any]]:
 
     for item in questions:
         if not isinstance(item, dict):
-            raise ValueError("Every dataset item must be a JSON object.")
+            raise TypeError("Every dataset item must be a JSON object.")
 
         missing = required_fields - item.keys()
 
@@ -262,7 +261,7 @@ def parse_judge_response(raw_response: str) -> dict[str, dict[str, Any]]:
         raise ValueError("Judge returned invalid JSON.") from exc
 
     if not isinstance(parsed, dict):
-        raise ValueError("Judge response must be a JSON object.")
+        raise TypeError("Judge response must be a JSON object.")
 
     if set(parsed.keys()) != set(JUDGE_DIMENSIONS):
         raise ValueError(
@@ -273,7 +272,7 @@ def parse_judge_response(raw_response: str) -> dict[str, dict[str, Any]]:
         value = parsed[dimension]
 
         if not isinstance(value, dict):
-            raise ValueError(f"{dimension} must be an object.")
+            raise TypeError(f"{dimension} must be an object.")
 
         if set(value.keys()) != {"score", "reason"}:
             raise ValueError(
@@ -284,7 +283,7 @@ def parse_judge_response(raw_response: str) -> dict[str, dict[str, Any]]:
         reason = value["reason"]
 
         if isinstance(score, bool) or not isinstance(score, int):
-            raise ValueError(f"{dimension} score must be an integer.")
+            raise TypeError(f"{dimension} score must be an integer.")
 
         if not 1 <= score <= 5:
             raise ValueError(f"{dimension} score must be between 1 and 5.")
@@ -327,7 +326,7 @@ def extract_retry_delay_seconds(
     return default_seconds
 
 
-def call_with_rate_limit_retry(
+def call_with_rate_limit_retry[T](
     operation: Callable[[], T],
     rate_limiter: APIRateLimiter,
     label: str,
@@ -408,7 +407,7 @@ def generate_answer_with_retry(
                 max_retries=max_rate_limit_retries,
             )
 
-        except ValueError as exc:
+        except (ValueError, TypeError) as exc:
             last_error = exc
 
             if attempt < max_json_attempts:
@@ -510,7 +509,7 @@ def judge_answer(
                 judge_result=judge_result,
             )
 
-        except ValueError as exc:
+        except (ValueError, TypeError) as exc:
             last_error = exc
 
             if attempt < max_json_attempts:
@@ -927,7 +926,8 @@ def evaluate(
             )
             raise
 
-        except Exception as exc:
+        # Keep one failed benchmark item from terminating the full run.
+        except Exception as exc:  # noqa: BLE001
             print(
                 f"  ERROR {question_id}: "
                 f"{type(exc).__name__}: {exc}"

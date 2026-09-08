@@ -169,7 +169,7 @@ class Generator:
             ) from exc
 
         if not isinstance(data, dict):
-            raise ValueError(
+            raise TypeError(
                 "LLM response must be a JSON object"
             )
 
@@ -186,7 +186,7 @@ class Generator:
         citations = data["citations"]
 
         if not isinstance(answer, str):
-            raise ValueError(
+            raise TypeError(
                 "LLM response field 'answer' "
                 "must be a string"
             )
@@ -197,7 +197,7 @@ class Generator:
             )
 
         if not isinstance(citations, list):
-            raise ValueError(
+            raise TypeError(
                 "LLM response field 'citations' "
                 "must be a list"
             )

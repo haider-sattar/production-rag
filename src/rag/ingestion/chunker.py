@@ -1,6 +1,6 @@
+import re
 from collections.abc import Callable
 from dataclasses import dataclass
-import re
 
 from rag.ingestion.parser import DocumentPage
 

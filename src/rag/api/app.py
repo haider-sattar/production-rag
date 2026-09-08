@@ -2,6 +2,7 @@ import logging
 import time
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from typing import Annotated
 from uuid import uuid4
 
 from dotenv import load_dotenv
@@ -17,7 +18,6 @@ from rag.generation.generator import Generator
 from rag.observability.langfuse import get_langfuse_client
 from rag.observability.logging import configure_logging
 from rag.retrieval.reranking_retriever import RerankingRetriever
-
 
 load_dotenv()
 
@@ -123,12 +123,14 @@ def create_app(
     )
     def query_rag(
         request: QueryRequest,
-        retriever: RerankingRetriever = Depends(
-            get_retriever
-        ),
-        generator: Generator = Depends(
-            get_generator
-        ),
+        retriever: Annotated[
+            RerankingRetriever,
+            Depends(get_retriever),
+        ],
+        generator: Annotated[
+            Generator,
+            Depends(get_generator),
+        ],
     ) -> QueryResponse:
         """
         Execute the complete RAG pipeline.
