@@ -2,19 +2,24 @@ import logging
 import time
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from pathlib import Path
+from tempfile import TemporaryDirectory
 from typing import Annotated
 from uuid import uuid4
 
 from dotenv import load_dotenv
-from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi import Depends, FastAPI, File, HTTPException, Request, UploadFile
+from starlette.concurrency import run_in_threadpool
 
 from rag.api.schemas import (
     CitationResponse,
+    DocumentUploadResponse,
     QueryRequest,
     QueryResponse,
 )
 from rag.generation.clients.gemini_client import GeminiClient
 from rag.generation.generator import Generator
+from rag.ingestion.service import IngestionService
 from rag.observability.langfuse import get_langfuse_client
 from rag.observability.logging import configure_logging
 from rag.retrieval.reranking_retriever import RerankingRetriever
@@ -26,6 +31,9 @@ configure_logging()
 logger = logging.getLogger(
     "rag.api"
 )
+
+
+MAX_PDF_SIZE_BYTES = 20 * 1024 * 1024
 
 
 def create_retriever() -> RerankingRetriever:
@@ -76,6 +84,10 @@ def create_app(
                 create_generator()
             )
 
+            app.state.ingestion_service = (
+                IngestionService()
+            )
+
         yield
 
     application = FastAPI(
@@ -107,6 +119,15 @@ def create_app(
 
         return request.app.state.generator
 
+    def get_ingestion_service(
+        request: Request,
+    ) -> IngestionService:
+        """
+        Return the application-wide ingestion service.
+        """
+
+        return request.app.state.ingestion_service
+
     @application.get("/health")
     def health_check() -> dict[str, str]:
         """
@@ -116,6 +137,160 @@ def create_app(
         return {
             "status": "ok",
         }
+
+    @application.post(
+        "/documents",
+        response_model=DocumentUploadResponse,
+        status_code=201,
+    )
+    async def upload_document(
+        file: Annotated[
+            UploadFile,
+            File(
+                description="PDF document to index.",
+            ),
+        ],
+        ingestion_service: Annotated[
+            IngestionService,
+            Depends(get_ingestion_service),
+        ],
+        retriever: Annotated[
+            RerankingRetriever,
+            Depends(get_retriever),
+        ],
+    ) -> DocumentUploadResponse:
+        """
+        Upload and index one PDF.
+
+        The endpoint validates the upload, assigns a fresh document_id,
+        runs the existing ingestion pipeline, and returns metadata needed
+        for subsequent /query requests.
+        """
+
+        filename = Path(
+            file.filename or "document.pdf"
+        ).name
+
+        if Path(filename).suffix.lower() != ".pdf":
+            raise HTTPException(
+                status_code=415,
+                detail="Only PDF files are supported",
+            )
+
+        contents = await file.read(
+            MAX_PDF_SIZE_BYTES + 1
+        )
+
+        if not contents:
+            raise HTTPException(
+                status_code=400,
+                detail="Uploaded PDF is empty",
+            )
+
+        if len(contents) > MAX_PDF_SIZE_BYTES:
+            raise HTTPException(
+                status_code=413,
+                detail="PDF exceeds the 20 MB upload limit",
+            )
+
+        if not contents.startswith(b"%PDF-"):
+            raise HTTPException(
+                status_code=415,
+                detail="Uploaded file is not a valid PDF",
+            )
+
+        document_id = str(
+            uuid4()
+        )
+
+        logger.info(
+            (
+                "document_upload_started "
+                "document_id=%s "
+                "filename=%r "
+                "size_bytes=%d"
+            ),
+            document_id,
+            filename,
+            len(contents),
+        )
+
+        try:
+            with TemporaryDirectory() as temp_dir:
+                temp_path = (
+                    Path(temp_dir) / filename
+                )
+
+                temp_path.write_bytes(
+                    contents
+                )
+
+                result = await run_in_threadpool(
+                    ingestion_service.ingest_pdf,
+                    temp_path,
+                    document_id,
+                )
+
+            # The dense retriever reads Qdrant directly. BM25 keeps
+            # a per-document cache, so invalidate it after indexing.
+            retriever.invalidate_document(
+                document_id=document_id,
+            )
+
+            logger.info(
+                (
+                    "document_upload_completed "
+                    "document_id=%s "
+                    "filename=%r "
+                    "pages=%d "
+                    "chunks=%d"
+                ),
+                result.document_id,
+                result.filename,
+                result.page_count,
+                result.chunk_count,
+            )
+
+            return DocumentUploadResponse(
+                document_id=result.document_id,
+                filename=result.filename,
+                page_count=result.page_count,
+                chunk_count=result.chunk_count,
+            )
+
+        except HTTPException:
+            raise
+
+        except ValueError as exc:
+            logger.warning(
+                (
+                    "document_upload_failed "
+                    "document_id=%s "
+                    "error=%s"
+                ),
+                document_id,
+                exc,
+            )
+
+            raise HTTPException(
+                status_code=400,
+                detail=str(exc),
+            ) from exc
+
+        except Exception as exc:
+            logger.exception(
+                (
+                    "document_upload_failed "
+                    "document_id=%s "
+                    "error_type=internal"
+                ),
+                document_id,
+            )
+
+            raise HTTPException(
+                status_code=500,
+                detail="Document ingestion failed",
+            ) from exc
 
     @application.post(
         "/query",
@@ -148,8 +323,14 @@ def create_app(
         langfuse = get_langfuse_client()
 
         logger.info(
-            "request_started request_id=%s question=%r",
+            (
+                "request_started "
+                "request_id=%s "
+                "document_id=%s "
+                "question=%r"
+            ),
             request_id,
+            request.document_id,
             request.question,
         )
 
@@ -158,10 +339,12 @@ def create_app(
                 as_type="span",
                 name="rag-query",
                 input={
+                    "document_id": request.document_id,
                     "question": request.question,
                 },
                 metadata={
                     "request_id": request_id,
+                    "document_id": request.document_id,
                 },
             ) as rag_span:
 
@@ -174,6 +357,7 @@ def create_app(
                     name="hybrid-retrieval-reranking",
                     input={
                         "query": request.question,
+                        "document_id": request.document_id,
                         "top_k": 5,
                         "rerank_candidates": 30,
                     },
@@ -181,8 +365,18 @@ def create_app(
 
                     chunks = retriever.search(
                         query=request.question,
+                        document_id=request.document_id,
                         top_k=5,
                     )
+
+                    if not chunks:
+                        raise HTTPException(
+                            status_code=404,
+                            detail=(
+                                "No indexed chunks found for "
+                                "the requested document_id"
+                            ),
+                        )
 
                     retrieval_ms = (
                         time.perf_counter()
@@ -230,6 +424,7 @@ def create_app(
                     name="gemini-generation",
                     model="gemini-2.5-flash",
                     input={
+                        "document_id": request.document_id,
                         "question": request.question,
                         "sources": [
                             {
@@ -323,6 +518,9 @@ def create_app(
                         "request_id": (
                             request_id
                         ),
+                        "document_id": (
+                            request.document_id
+                        ),
                         "retrieval_ms": (
                             retrieval_ms
                         ),
@@ -345,6 +543,7 @@ def create_app(
                 (
                     "request_completed "
                     "request_id=%s "
+                    "document_id=%s "
                     "retrieval_ms=%.2f "
                     "generation_ms=%.2f "
                     "total_ms=%.2f "
@@ -352,6 +551,7 @@ def create_app(
                     "citations=%d"
                 ),
                 request_id,
+                request.document_id,
                 retrieval_ms,
                 generation_ms,
                 total_ms,
@@ -363,6 +563,9 @@ def create_app(
                 answer=result.answer,
                 citations=citations,
             )
+
+        except HTTPException:
+            raise
 
         except ValueError as exc:
             total_ms = (

@@ -7,8 +7,10 @@ from rag.retrieval.retriever import RetrievedChunk, Retriever
 
 class HybridRetriever:
     """
-    Dense aur BM25 results ko Reciprocal Rank Fusion
-    ke through combine karta hai.
+    Combine dense and BM25 results using Reciprocal Rank Fusion.
+
+    Every search is restricted to one document_id so candidates
+    from different uploaded PDFs cannot be mixed.
     """
 
     def __init__(
@@ -48,10 +50,10 @@ class HybridRetriever:
         chunk: RetrievedChunk,
     ) -> tuple[str, int]:
         """
-        Ek document chunk ki stable identity.
+        Return a stable identity for one document chunk.
 
-        Same chunk dense aur BM25 dono mein aaye to
-        RRF scores isi key ke through combine honge.
+        If the same chunk appears in both dense and BM25 results,
+        RRF scores are combined using this key.
         """
 
         return (
@@ -59,19 +61,41 @@ class HybridRetriever:
             chunk.chunk_index,
         )
 
+    def invalidate_document(
+        self,
+        document_id: str,
+    ) -> None:
+        """
+        Invalidate cached lexical state for one document.
+
+        Dense retrieval reads directly from Qdrant and needs no
+        cache invalidation. BM25 keeps a per-document in-memory
+        index, so that cache must be cleared after upload/delete.
+        """
+
+        self.bm25_retriever.invalidate_document(
+            document_id=document_id,
+        )
+
     def search(
         self,
         query: str,
+        document_id: str,
         top_k: int = 5,
     ) -> list[RetrievedChunk]:
         """
-        Dense aur BM25 candidates retrieve karke
-        unko RRF se rank karta hai.
+        Retrieve dense and BM25 candidates from one document and
+        fuse them using Reciprocal Rank Fusion.
         """
 
         if not query.strip():
             raise ValueError(
                 "Query cannot be empty"
+            )
+
+        if not document_id.strip():
+            raise ValueError(
+                "document_id cannot be empty"
             )
 
         if top_k <= 0:
@@ -84,14 +108,20 @@ class HybridRetriever:
             top_k,
         )
 
-        dense_results = self.dense_retriever.search(
-            query=query,
-            top_k=candidate_limit,
+        dense_results = (
+            self.dense_retriever.search(
+                query=query,
+                document_id=document_id,
+                top_k=candidate_limit,
+            )
         )
 
-        bm25_results = self.bm25_retriever.search(
-            query=query,
-            top_k=candidate_limit,
+        bm25_results = (
+            self.bm25_retriever.search(
+                query=query,
+                document_id=document_id,
+                top_k=candidate_limit,
+            )
         )
 
         rrf_scores: dict[
@@ -133,11 +163,18 @@ class HybridRetriever:
             reverse=True,
         )
 
-        final_results: list[RetrievedChunk] = []
-        seen_pages: set[tuple[str, int]] = set()
+        final_results: list[
+            RetrievedChunk
+        ] = []
+
+        seen_pages: set[
+            tuple[str, int]
+        ] = set()
 
         for key in ranked_keys:
-            original_chunk = chunks_by_key[key]
+            original_chunk = (
+                chunks_by_key[key]
+            )
 
             page_key = (
                 original_chunk.document_id,
@@ -147,7 +184,9 @@ class HybridRetriever:
             if page_key in seen_pages:
                 continue
 
-            seen_pages.add(page_key)
+            seen_pages.add(
+                page_key
+            )
 
             final_results.append(
                 replace(

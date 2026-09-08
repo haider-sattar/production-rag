@@ -1,5 +1,15 @@
+from uuid import NAMESPACE_URL, uuid5
+
 from qdrant_client import QdrantClient
-from qdrant_client.models import Distance, PointStruct, VectorParams
+from qdrant_client.models import (
+    Distance,
+    FieldCondition,
+    Filter,
+    MatchValue,
+    PayloadSchemaType,
+    PointStruct,
+    VectorParams,
+)
 
 from rag.ingestion.chunker import DocumentChunk
 
@@ -10,8 +20,9 @@ class VectorStore:
 
     Responsibilities:
     - create the vector collection
+    - create payload indexes used for filtering
     - store chunk embeddings
-    - later: search for similar vectors
+    - delete all chunks belonging to one document
     """
 
     def __init__(
@@ -41,20 +52,95 @@ class VectorStore:
 
     def create_collection(self) -> None:
         """
-        Create the Qdrant collection if it does not already exist.
+        Ensure the Qdrant collection and required indexes exist.
+
+        Stored data is never deleted when this method is called.
         """
 
-        # We do not want to delete/recreate the collection every time
-        # the application starts because that would destroy stored data.
-        if self.client.collection_exists(self.collection_name):
-            return
+        if not self.client.collection_exists(
+            self.collection_name
+        ):
+            self.client.create_collection(
+                collection_name=self.collection_name,
+                vectors_config=VectorParams(
+                    size=self.vector_size,
+                    distance=Distance.COSINE,
+                ),
+            )
 
-        self.client.create_collection(
+        self._ensure_payload_indexes()
+
+    def _ensure_payload_indexes(self) -> None:
+        """
+        Create indexes for payload fields used in filtering.
+
+        document_id is indexed because queries will frequently restrict
+        retrieval to a single uploaded document.
+        """
+
+        collection_info = self.client.get_collection(
             collection_name=self.collection_name,
-            vectors_config=VectorParams(
-                size=self.vector_size,
-                distance=Distance.COSINE,
-            ),
+        )
+
+        if (
+            "document_id"
+            not in collection_info.payload_schema
+        ):
+            self.client.create_payload_index(
+                collection_name=self.collection_name,
+                field_name="document_id",
+                field_schema=PayloadSchemaType.KEYWORD,
+            )
+
+    @staticmethod
+    def build_document_filter(
+        document_id: str,
+    ) -> Filter:
+        """
+        Build a Qdrant filter restricting results to one document.
+        """
+
+        if not document_id.strip():
+            raise ValueError(
+                "document_id cannot be empty"
+            )
+
+        return Filter(
+            must=[
+                FieldCondition(
+                    key="document_id",
+                    match=MatchValue(
+                        value=document_id,
+                    ),
+                )
+            ]
+        )
+
+    @staticmethod
+    def build_point_id(
+        chunk: DocumentChunk,
+    ) -> str:
+        """
+        Build a deterministic globally unique Qdrant point ID.
+
+        chunk_index alone is not sufficient because every document
+        starts chunk numbering from zero.
+
+        UUID5 gives us a deterministic ID based on:
+            document_id + chunk_index
+
+        Re-ingesting the same document therefore updates the same
+        points instead of creating duplicates.
+        """
+
+        return str(
+            uuid5(
+                NAMESPACE_URL,
+                (
+                    f"{chunk.document_id}:"
+                    f"{chunk.chunk_index}"
+                ),
+            )
         )
 
     def store_chunks(
@@ -63,15 +149,19 @@ class VectorStore:
         embeddings: list[list[float]],
     ) -> None:
         """
-        Store document chunks and their embedding vectors in Qdrant.
+        Store document chunks and embeddings in Qdrant.
 
-        Each chunk corresponds to exactly one vector and one Qdrant point.
+        Each chunk corresponds to exactly one vector and one
+        deterministic Qdrant point.
         """
 
         if len(chunks) != len(embeddings):
             raise ValueError(
                 "Number of chunks must match number of embeddings"
             )
+
+        if not chunks:
+            return
 
         points: list[PointStruct] = []
 
@@ -80,29 +170,46 @@ class VectorStore:
             embeddings,
             strict=True,
         ):
-            # For now we build a deterministic numeric point ID using
-            # the chunk index. Later we'll improve this for multiple
-            # documents/users so IDs cannot collide.
-            point_id = chunk.chunk_index
-
             points.append(
                 PointStruct(
-                    id=point_id,
+                    id=self.build_point_id(
+                        chunk
+                    ),
                     vector=embedding,
                     payload={
-                        "document_id": chunk.document_id,
+                        "document_id": (
+                            chunk.document_id
+                        ),
                         "filename": chunk.filename,
-                        "page_number": chunk.page_number,
-                        "chunk_index": chunk.chunk_index,
+                        "page_number": (
+                            chunk.page_number
+                        ),
+                        "chunk_index": (
+                            chunk.chunk_index
+                        ),
                         "text": chunk.text,
                     },
                 )
             )
 
-        # Upsert means:
-        # - insert a point if the ID does not exist
-        # - update it if the ID already exists
         self.client.upsert(
             collection_name=self.collection_name,
             points=points,
+            wait=True,
+        )
+
+    def delete_document(
+        self,
+        document_id: str,
+    ) -> None:
+        """
+        Delete every stored chunk belonging to one document.
+        """
+
+        self.client.delete(
+            collection_name=self.collection_name,
+            points_selector=self.build_document_filter(
+                document_id=document_id,
+            ),
+            wait=True,
         )

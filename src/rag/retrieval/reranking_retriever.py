@@ -8,8 +8,8 @@ from rag.retrieval.retriever import RetrievedChunk
 
 class RerankingRetriever:
     """
-    Hybrid retrieval se candidates leta hai aur cross-encoder
-    ke through unki final relevance ranking improve karta hai.
+    Retrieve hybrid candidates from one document and rerank them
+    with a cross-encoder for final relevance ordering.
     """
 
     def __init__(
@@ -39,27 +39,52 @@ class RerankingRetriever:
                 rrf_constant=60,
             )
 
-        self.hybrid_retriever = hybrid_retriever
-        self.rerank_candidates = rerank_candidates
+        self.hybrid_retriever = (
+            hybrid_retriever
+        )
+        self.rerank_candidates = (
+            rerank_candidates
+        )
         self.batch_size = batch_size
 
         self.model = CrossEncoder(
             model_name,
         )
 
+    def invalidate_document(
+        self,
+        document_id: str,
+    ) -> None:
+        """
+        Invalidate cached retrieval state for one document.
+
+        The hybrid retriever forwards this to BM25, which keeps
+        the per-document lexical cache.
+        """
+
+        self.hybrid_retriever.invalidate_document(
+            document_id=document_id,
+        )
+
     def search(
         self,
         query: str,
+        document_id: str,
         top_k: int = 5,
     ) -> list[RetrievedChunk]:
         """
-        Hybrid candidates ko query ke against cross-encoder
-        se score karta hai aur best top-k results return karta hai.
+        Retrieve candidates from one document, score them against
+        the query with the cross-encoder, and return the best top-k.
         """
 
         if not query.strip():
             raise ValueError(
                 "Query cannot be empty"
+            )
+
+        if not document_id.strip():
+            raise ValueError(
+                "document_id cannot be empty"
             )
 
         if top_k <= 0:
@@ -72,9 +97,12 @@ class RerankingRetriever:
             top_k,
         )
 
-        candidates = self.hybrid_retriever.search(
-            query=query,
-            top_k=candidate_limit,
+        candidates = (
+            self.hybrid_retriever.search(
+                query=query,
+                document_id=document_id,
+                top_k=candidate_limit,
+            )
         )
 
         if not candidates:
