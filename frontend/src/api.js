@@ -1,6 +1,7 @@
 const API_BASE = (
   import.meta.env.VITE_API_BASE_URL || "/api"
 ).replace(/\/$/, "");
+
 async function parseResponse(response) {
   const contentType = response.headers.get("content-type") || "";
   let data = null;
