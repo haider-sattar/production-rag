@@ -11,6 +11,11 @@ from qdrant_client.models import (
     VectorParams,
 )
 
+from rag.config import (
+    QDRANT_API_KEY,
+    QDRANT_TIMEOUT_SECONDS,
+    QDRANT_URL,
+)
 from rag.ingestion.chunker import DocumentChunk
 
 
@@ -27,26 +32,17 @@ class VectorStore:
 
     def __init__(
         self,
-        url: str = "http://localhost:6333",
+        url: str = QDRANT_URL,
+        api_key: str | None = QDRANT_API_KEY,
         collection_name: str = "documents",
         vector_size: int = 384,
     ) -> None:
-        """
-        Connect to Qdrant.
+        self.client = QdrantClient(
+            url=url,
+            api_key=api_key,
+            timeout=QDRANT_TIMEOUT_SECONDS,
+        )
 
-        Args:
-            url:
-                Address where Qdrant is running.
-
-            collection_name:
-                Name of the Qdrant collection used for document chunks.
-
-            vector_size:
-                Number of dimensions produced by the embedding model.
-                MiniLM-L6-v2 produces 384-dimensional embeddings.
-        """
-
-        self.client = QdrantClient(url=url)
         self.collection_name = collection_name
         self.vector_size = vector_size
 
@@ -54,7 +50,7 @@ class VectorStore:
         """
         Ensure the Qdrant collection and required indexes exist.
 
-        Stored data is never deleted when this method is called.
+        Existing stored data is not deleted.
         """
 
         if not self.client.collection_exists(
@@ -74,12 +70,16 @@ class VectorStore:
         """
         Create indexes for payload fields used in filtering.
 
-        document_id is indexed because queries will frequently restrict
-        retrieval to a single uploaded document.
+        document_id is indexed because queries frequently restrict
+        retrieval to one uploaded document.
         """
 
-        collection_info = self.client.get_collection(
-            collection_name=self.collection_name,
+        collection_info = (
+            self.client.get_collection(
+                collection_name=(
+                    self.collection_name
+                ),
+            )
         )
 
         if (
@@ -87,9 +87,14 @@ class VectorStore:
             not in collection_info.payload_schema
         ):
             self.client.create_payload_index(
-                collection_name=self.collection_name,
+                collection_name=(
+                    self.collection_name
+                ),
                 field_name="document_id",
-                field_schema=PayloadSchemaType.KEYWORD,
+                field_schema=(
+                    PayloadSchemaType.KEYWORD
+                ),
+                wait=True,
             )
 
     @staticmethod
@@ -126,11 +131,11 @@ class VectorStore:
         chunk_index alone is not sufficient because every document
         starts chunk numbering from zero.
 
-        UUID5 gives us a deterministic ID based on:
+        UUID5 produces the same point ID for the same:
             document_id + chunk_index
 
-        Re-ingesting the same document therefore updates the same
-        points instead of creating duplicates.
+        Re-ingesting the same document therefore updates those
+        points instead of producing duplicate point IDs.
         """
 
         return str(
@@ -147,17 +152,33 @@ class VectorStore:
         self,
         chunks: list[DocumentChunk],
         embeddings: list[list[float]],
+        batch_size: int = 32,
     ) -> None:
         """
         Store document chunks and embeddings in Qdrant.
 
-        Each chunk corresponds to exactly one vector and one
-        deterministic Qdrant point.
+        Points are uploaded in batches so large documents do not create
+        one oversized remote request.
+
+        Args:
+            chunks:
+                Document chunks to store.
+
+            embeddings:
+                Dense vector corresponding to each chunk.
+
+            batch_size:
+                Maximum number of Qdrant points uploaded per request.
         """
 
         if len(chunks) != len(embeddings):
             raise ValueError(
                 "Number of chunks must match number of embeddings"
+            )
+
+        if batch_size <= 0:
+            raise ValueError(
+                "batch_size must be greater than 0"
             )
 
         if not chunks:
@@ -180,7 +201,9 @@ class VectorStore:
                         "document_id": (
                             chunk.document_id
                         ),
-                        "filename": chunk.filename,
+                        "filename": (
+                            chunk.filename
+                        ),
                         "page_number": (
                             chunk.page_number
                         ),
@@ -192,11 +215,22 @@ class VectorStore:
                 )
             )
 
-        self.client.upsert(
-            collection_name=self.collection_name,
-            points=points,
-            wait=True,
-        )
+        for start in range(
+            0,
+            len(points),
+            batch_size,
+        ):
+            batch = points[
+                start : start + batch_size
+            ]
+
+            self.client.upsert(
+                collection_name=(
+                    self.collection_name
+                ),
+                points=batch,
+                wait=True,
+            )
 
     def delete_document(
         self,
@@ -206,10 +240,19 @@ class VectorStore:
         Delete every stored chunk belonging to one document.
         """
 
+        if not document_id.strip():
+            raise ValueError(
+                "document_id cannot be empty"
+            )
+
         self.client.delete(
-            collection_name=self.collection_name,
-            points_selector=self.build_document_filter(
-                document_id=document_id,
+            collection_name=(
+                self.collection_name
+            ),
+            points_selector=(
+                self.build_document_filter(
+                    document_id=document_id,
+                )
             ),
             wait=True,
         )

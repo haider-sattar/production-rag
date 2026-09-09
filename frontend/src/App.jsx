@@ -514,8 +514,8 @@ function App() {
             </div>
 
             <div className="about-links">
-              <a href={GITHUB_URL} target="_blank" rel="noreferrer">GitHub</a>
-              <a href={LINKEDIN_URL} target="_blank" rel="noreferrer">LinkedIn</a>
+              <a href={'https://github.com/haider-sattar/production-rag'} target="_blank" rel="noreferrer">GitHub</a>
+              <a href={'https://www.linkedin.com/in/ali-haider-467948329/'} target="_blank" rel="noreferrer">LinkedIn</a>
             </div>
           </div>
         </section>

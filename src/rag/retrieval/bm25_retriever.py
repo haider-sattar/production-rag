@@ -4,8 +4,17 @@ from typing import Any
 from qdrant_client import QdrantClient
 from rank_bm25 import BM25Okapi
 
-from rag.retrieval.retriever import RetrievedChunk
-from rag.retrieval.vector_store import VectorStore
+from rag.config import (
+    QDRANT_API_KEY,
+    QDRANT_TIMEOUT_SECONDS,
+    QDRANT_URL,
+)
+from rag.retrieval.retriever import (
+    RetrievedChunk,
+)
+from rag.retrieval.vector_store import (
+    VectorStore,
+)
 
 STOP_WORDS = {
     "a",
@@ -51,14 +60,19 @@ STOP_WORDS = {
 }
 
 
-def tokenize(text: str) -> list[str]:
+def tokenize(
+    text: str,
+) -> list[str]:
     """
     Normalize text for BM25 while preserving useful terms,
     acronyms, years, and values such as 5G, LMICs, and 2025.
     """
 
     tokens = re.findall(
-        pattern=r"\b[a-z0-9]+(?:-[a-z0-9]+)*\b",
+        pattern=(
+            r"\b[a-z0-9]+"
+            r"(?:-[a-z0-9]+)*\b"
+        ),
         string=text.lower(),
     )
 
@@ -74,24 +88,28 @@ class BM25Retriever:
     Perform lexical BM25 retrieval over chunks stored in Qdrant.
 
     BM25 indexes are built per document so lexical statistics and
-    search results never mix chunks from different uploaded PDFs.
+    results never mix chunks from different uploaded PDFs.
     """
 
     def __init__(
         self,
-        url: str = "http://localhost:6333",
+        url: str = QDRANT_URL,
+        api_key: str | None = QDRANT_API_KEY,
         collection_name: str = "documents",
     ) -> None:
-        self.client = QdrantClient(url=url)
+        self.client = QdrantClient(
+            url=url,
+            api_key=api_key,
+            timeout=QDRANT_TIMEOUT_SECONDS,
+        )
+
         self.collection_name = collection_name
 
-        # Cache one BM25 index per document. This avoids rebuilding the
-        # lexical index on every query while still keeping documents
-        # strictly isolated from one another.
         self._chunks_by_document: dict[
             str,
             list[RetrievedChunk],
         ] = {}
+
         self._bm25_by_document: dict[
             str,
             BM25Okapi,
@@ -104,10 +122,13 @@ class BM25Retriever:
         """
         Load only one document's chunk payloads from Qdrant.
 
-        Vectors are not loaded because BM25 only needs text.
+        Vectors are not loaded because BM25 only requires text.
         """
 
-        chunks: list[RetrievedChunk] = []
+        chunks: list[
+            RetrievedChunk
+        ] = []
+
         offset: Any = None
 
         document_filter = (
@@ -117,17 +138,25 @@ class BM25Retriever:
         )
 
         while True:
-            points, next_offset = self.client.scroll(
-                collection_name=self.collection_name,
-                scroll_filter=document_filter,
-                limit=256,
-                offset=offset,
-                with_payload=True,
-                with_vectors=False,
+            points, next_offset = (
+                self.client.scroll(
+                    collection_name=(
+                        self.collection_name
+                    ),
+                    scroll_filter=(
+                        document_filter
+                    ),
+                    limit=256,
+                    offset=offset,
+                    with_payload=True,
+                    with_vectors=False,
+                )
             )
 
             for point in points:
-                payload = point.payload or {}
+                payload = (
+                    point.payload or {}
+                )
 
                 text = str(
                     payload.get(
@@ -187,12 +216,14 @@ class BM25Retriever:
         """
         Return the cached BM25 index for one document.
 
-        The index is created lazily the first time that document is
-        queried. This also allows the API to start when Qdrant contains
-        no uploaded documents yet.
+        The index is built lazily the first time the document is
+        queried.
         """
 
-        if document_id in self._chunks_by_document:
+        if (
+            document_id
+            in self._chunks_by_document
+        ):
             return (
                 self._chunks_by_document[
                     document_id
@@ -235,8 +266,8 @@ class BM25Retriever:
         """
         Remove one document from the local BM25 cache.
 
-        Call this after that document is uploaded again, replaced,
-        or deleted so its next query rebuilds the index from Qdrant.
+        Call after upload, replacement, or deletion so the next
+        query rebuilds the BM25 index from Qdrant.
         """
 
         if not document_id.strip():
@@ -301,11 +332,15 @@ class BM25Retriever:
 
         ranked_indices = sorted(
             range(len(scores)),
-            key=lambda index: scores[index],
+            key=lambda index: (
+                scores[index]
+            ),
             reverse=True,
         )[:top_k]
 
-        results: list[RetrievedChunk] = []
+        results: list[
+            RetrievedChunk
+        ] = []
 
         for index in ranked_indices:
             chunk = chunks[index]
@@ -316,7 +351,9 @@ class BM25Retriever:
                     document_id=(
                         chunk.document_id
                     ),
-                    filename=chunk.filename,
+                    filename=(
+                        chunk.filename
+                    ),
                     page_number=(
                         chunk.page_number
                     ),

@@ -2,8 +2,17 @@ from dataclasses import dataclass
 
 from qdrant_client import QdrantClient
 
-from rag.retrieval.embeddings import EmbeddingService
-from rag.retrieval.vector_store import VectorStore
+from rag.config import (
+    QDRANT_API_KEY,
+    QDRANT_TIMEOUT_SECONDS,
+    QDRANT_URL,
+)
+from rag.retrieval.embeddings import (
+    EmbeddingService,
+)
+from rag.retrieval.vector_store import (
+    VectorStore,
+)
 
 
 @dataclass
@@ -34,16 +43,41 @@ class Retriever:
     def __init__(
         self,
         embedding_service: EmbeddingService,
-        url: str = "http://localhost:6333",
+        url: str = QDRANT_URL,
+        api_key: str | None = QDRANT_API_KEY,
         collection_name: str = "documents",
     ) -> None:
-        # Query embeddings must be created with the same model
-        # used for the stored document embeddings.
-        self.embedding_service = embedding_service
+        """
+        Initialize dense retrieval.
 
-        # Qdrant connection.
-        self.client = QdrantClient(url=url)
-        self.collection_name = collection_name
+        Args:
+            embedding_service:
+                Embedding model used to encode queries.
+
+            url:
+                Local Qdrant or Qdrant Cloud URL.
+
+            api_key:
+                Optional Qdrant API key.
+                Local Qdrant normally does not require one.
+
+            collection_name:
+                Qdrant collection containing document chunks.
+        """
+
+        self.embedding_service = (
+            embedding_service
+        )
+
+        self.client = QdrantClient(
+            url=url,
+            api_key=api_key,
+            timeout=QDRANT_TIMEOUT_SECONDS,
+        )
+
+        self.collection_name = (
+            collection_name
+        )
 
     def search(
         self,
@@ -60,7 +94,7 @@ class Retriever:
                 Natural-language search query.
 
             document_id:
-                Identifier of the uploaded document that the search
+                Identifier of the uploaded document that retrieval
                 must be restricted to.
 
             top_k:
@@ -71,7 +105,9 @@ class Retriever:
         """
 
         if not query.strip():
-            raise ValueError("Query cannot be empty")
+            raise ValueError(
+                "Query cannot be empty"
+            )
 
         if not document_id.strip():
             raise ValueError(
@@ -90,17 +126,18 @@ class Retriever:
             )
         )
 
-        # Restrict Qdrant search to the selected document.
+        # Restrict dense retrieval to the selected document.
         document_filter = (
             VectorStore.build_document_filter(
                 document_id=document_id,
             )
         )
 
-        # Ask Qdrant for the closest stored vectors only from
-        # the requested document.
+        # Search only chunks belonging to this document.
         response = self.client.query_points(
-            collection_name=self.collection_name,
+            collection_name=(
+                self.collection_name
+            ),
             query=query_vector,
             query_filter=document_filter,
             limit=top_k,
@@ -112,7 +149,9 @@ class Retriever:
         ] = []
 
         for result in response.points:
-            payload = result.payload or {}
+            payload = (
+                result.payload or {}
+            )
 
             retrieved_chunks.append(
                 RetrievedChunk(

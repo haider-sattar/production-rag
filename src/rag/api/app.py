@@ -1,5 +1,4 @@
 import logging
-import os
 import time
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
@@ -8,9 +7,17 @@ from tempfile import TemporaryDirectory
 from typing import Annotated
 from uuid import uuid4
 
-from dotenv import load_dotenv
-from fastapi import Depends, FastAPI, File, HTTPException, Request, UploadFile
-from starlette.concurrency import run_in_threadpool
+from fastapi import (
+    Depends,
+    FastAPI,
+    File,
+    HTTPException,
+    Request,
+    UploadFile,
+)
+from starlette.concurrency import (
+    run_in_threadpool,
+)
 
 from rag.api.schemas import (
     CitationResponse,
@@ -19,19 +26,39 @@ from rag.api.schemas import (
     QueryRequest,
     QueryResponse,
 )
-from rag.generation.clients.gemini_client import GeminiClient
+from rag.config import (
+    QDRANT_API_KEY,
+    QDRANT_URL,
+)
+from rag.generation.clients.gemini_client import (
+    GeminiClient,
+)
 from rag.generation.generator import Generator
-from rag.ingestion.service import IngestionService
-from rag.observability.langfuse import get_langfuse_client
-from rag.observability.logging import configure_logging
-from rag.retrieval.bm25_retriever import BM25Retriever
-from rag.retrieval.embeddings import EmbeddingService
-from rag.retrieval.hybrid_retriever import HybridRetriever
-from rag.retrieval.reranking_retriever import RerankingRetriever
+from rag.ingestion.service import (
+    IngestionService,
+)
+from rag.observability.langfuse import (
+    get_langfuse_client,
+)
+from rag.observability.logging import (
+    configure_logging,
+)
+from rag.retrieval.bm25_retriever import (
+    BM25Retriever,
+)
+from rag.retrieval.embeddings import (
+    EmbeddingService,
+)
+from rag.retrieval.hybrid_retriever import (
+    HybridRetriever,
+)
+from rag.retrieval.reranking_retriever import (
+    RerankingRetriever,
+)
 from rag.retrieval.retriever import Retriever
-from rag.retrieval.vector_store import VectorStore
-
-load_dotenv()
+from rag.retrieval.vector_store import (
+    VectorStore,
+)
 
 configure_logging()
 
@@ -39,46 +66,77 @@ logger = logging.getLogger(
     "rag.api"
 )
 
-
-MAX_PDF_SIZE_BYTES = 20 * 1024 * 1024
+MAX_PDF_SIZE_BYTES = (
+    20 * 1024 * 1024
+)
 
 
 def create_retriever(
-    embedding_service: EmbeddingService | None = None,
-    qdrant_url: str = "http://localhost:6333",
+    embedding_service: (
+        EmbeddingService | None
+    ) = None,
+    qdrant_url: str = QDRANT_URL,
+    qdrant_api_key: (
+        str | None
+    ) = QDRANT_API_KEY,
 ) -> RerankingRetriever:
     """
     Create the production retrieval pipeline.
+
+    Pipeline:
+        dense retrieval
+        + BM25 lexical retrieval
+        -> Reciprocal Rank Fusion
+        -> cross-encoder reranking
+
+    Qdrant Cloud credentials are passed to
+    every component that communicates directly
+    with Qdrant.
     """
 
     if embedding_service is None:
-        embedding_service = EmbeddingService()
+        embedding_service = (
+            EmbeddingService()
+        )
 
     dense_retriever = Retriever(
-        embedding_service=embedding_service,
+        embedding_service=(
+            embedding_service
+        ),
         url=qdrant_url,
+        api_key=qdrant_api_key,
     )
 
     bm25_retriever = BM25Retriever(
         url=qdrant_url,
+        api_key=qdrant_api_key,
     )
 
-    hybrid_retriever = HybridRetriever(
-        dense_retriever=dense_retriever,
-        bm25_retriever=bm25_retriever,
-        candidate_k=30,
-        rrf_constant=60,
+    hybrid_retriever = (
+        HybridRetriever(
+            dense_retriever=(
+                dense_retriever
+            ),
+            bm25_retriever=(
+                bm25_retriever
+            ),
+            candidate_k=30,
+            rrf_constant=60,
+        )
     )
 
     return RerankingRetriever(
-        hybrid_retriever=hybrid_retriever,
+        hybrid_retriever=(
+            hybrid_retriever
+        ),
         rerank_candidates=30,
     )
 
 
 def create_generator() -> Generator:
     """
-    Create the production generation pipeline.
+    Create the production generation
+    pipeline.
     """
 
     return Generator(
@@ -94,32 +152,48 @@ def create_app(
 
     initialize_rag=True:
         Production/development application.
-        Heavy RAG components are loaded during startup.
+        Heavy RAG components are loaded
+        during startup.
 
     initialize_rag=False:
-        Lightweight application used for unit tests.
+        Lightweight application used for
+        unit tests.
     """
 
     @asynccontextmanager
     async def lifespan(
         app: FastAPI,
     ) -> AsyncIterator[None]:
+        """
+        Initialize application-wide RAG
+        dependencies once at startup.
+
+        The same embedding model instance is
+        shared between ingestion and dense
+        retrieval.
+        """
 
         if initialize_rag:
-            embedding_service = EmbeddingService()
-            qdrant_url = os.getenv(
-                "QDRANT_URL",
-                "http://localhost:6333",
+            embedding_service = (
+                EmbeddingService()
             )
 
             vector_store = VectorStore(
-                url=qdrant_url,
+                url=QDRANT_URL,
+                api_key=QDRANT_API_KEY,
             )
 
             app.state.retriever = (
                 create_retriever(
-                    embedding_service=embedding_service,
-                    qdrant_url=qdrant_url,
+                    embedding_service=(
+                        embedding_service
+                    ),
+                    qdrant_url=(
+                        QDRANT_URL
+                    ),
+                    qdrant_api_key=(
+                        QDRANT_API_KEY
+                    ),
                 )
             )
 
@@ -129,9 +203,23 @@ def create_app(
 
             app.state.ingestion_service = (
                 IngestionService(
-                    embedding_service=embedding_service,
-                    vector_store=vector_store,
+                    embedding_service=(
+                        embedding_service
+                    ),
+                    vector_store=(
+                        vector_store
+                    ),
                 )
+            )
+
+            logger.info(
+                (
+                    "rag_components_initialized "
+                    "qdrant_url=%s "
+                    "qdrant_api_key_configured=%s"
+                ),
+                QDRANT_URL,
+                bool(QDRANT_API_KEY),
             )
 
         yield
@@ -140,9 +228,11 @@ def create_app(
         title="Production RAG API",
         version="0.1.0",
         description=(
-            "Production-style Retrieval-Augmented Generation API "
-            "with hybrid retrieval, reranking, generation, "
-            "validated citations, and observability."
+            "Production-style "
+            "Retrieval-Augmented Generation "
+            "API with hybrid retrieval, "
+            "reranking, generation, validated "
+            "citations, and observability."
         ),
         lifespan=lifespan,
     )
@@ -151,33 +241,49 @@ def create_app(
         request: Request,
     ) -> RerankingRetriever:
         """
-        Return the application-wide retriever.
+        Return the application-wide
+        retriever.
         """
 
-        return request.app.state.retriever
+        return (
+            request.app.state.retriever
+        )
 
     def get_generator(
         request: Request,
     ) -> Generator:
         """
-        Return the application-wide generator.
+        Return the application-wide
+        generator.
         """
 
-        return request.app.state.generator
+        return (
+            request.app.state.generator
+        )
 
     def get_ingestion_service(
         request: Request,
     ) -> IngestionService:
         """
-        Return the application-wide ingestion service.
+        Return the application-wide
+        ingestion service.
         """
 
-        return request.app.state.ingestion_service
+        return (
+            request.app.state
+            .ingestion_service
+        )
 
-    @application.get("/health")
-    def health_check() -> dict[str, str]:
+    @application.get(
+        "/health"
+    )
+    def health_check() -> dict[
+        str,
+        str,
+    ]:
         """
-        Verify that the API process is running.
+        Verify that the API process is
+        running.
         """
 
         return {
@@ -186,19 +292,25 @@ def create_app(
 
     @application.post(
         "/documents",
-        response_model=DocumentUploadResponse,
+        response_model=(
+            DocumentUploadResponse
+        ),
         status_code=201,
     )
     async def upload_document(
         file: Annotated[
             UploadFile,
             File(
-                description="PDF document to index.",
+                description=(
+                    "PDF document to index."
+                ),
             ),
         ],
         ingestion_service: Annotated[
             IngestionService,
-            Depends(get_ingestion_service),
+            Depends(
+                get_ingestion_service
+            ),
         ],
         retriever: Annotated[
             RerankingRetriever,
@@ -208,19 +320,28 @@ def create_app(
         """
         Upload and index one PDF.
 
-        The endpoint validates the upload, assigns a fresh document_id,
-        runs the existing ingestion pipeline, and returns metadata needed
-        for subsequent /query requests.
+        The endpoint validates the upload,
+        assigns a fresh document_id, runs the
+        ingestion pipeline, and returns
+        metadata required for later queries.
         """
 
         filename = Path(
-            file.filename or "document.pdf"
+            file.filename
+            or "document.pdf"
         ).name
 
-        if Path(filename).suffix.lower() != ".pdf":
+        if (
+            Path(filename)
+            .suffix.lower()
+            != ".pdf"
+        ):
             raise HTTPException(
                 status_code=415,
-                detail="Only PDF files are supported",
+                detail=(
+                    "Only PDF files are "
+                    "supported"
+                ),
             )
 
         contents = await file.read(
@@ -230,19 +351,32 @@ def create_app(
         if not contents:
             raise HTTPException(
                 status_code=400,
-                detail="Uploaded PDF is empty",
+                detail=(
+                    "Uploaded PDF is empty"
+                ),
             )
 
-        if len(contents) > MAX_PDF_SIZE_BYTES:
+        if (
+            len(contents)
+            > MAX_PDF_SIZE_BYTES
+        ):
             raise HTTPException(
                 status_code=413,
-                detail="PDF exceeds the 20 MB upload limit",
+                detail=(
+                    "PDF exceeds the 20 MB "
+                    "upload limit"
+                ),
             )
 
-        if not contents.startswith(b"%PDF-"):
+        if not contents.startswith(
+            b"%PDF-"
+        ):
             raise HTTPException(
                 status_code=415,
-                detail="Uploaded file is not a valid PDF",
+                detail=(
+                    "Uploaded file is not "
+                    "a valid PDF"
+                ),
             )
 
         document_id = str(
@@ -262,23 +396,30 @@ def create_app(
         )
 
         try:
-            with TemporaryDirectory() as temp_dir:
+            with TemporaryDirectory() as (
+                temp_dir
+            ):
                 temp_path = (
-                    Path(temp_dir) / filename
+                    Path(temp_dir)
+                    / filename
                 )
 
                 temp_path.write_bytes(
                     contents
                 )
 
-                result = await run_in_threadpool(
-                    ingestion_service.ingest_pdf,
-                    temp_path,
-                    document_id,
+                result = (
+                    await run_in_threadpool(
+                        ingestion_service
+                        .ingest_pdf,
+                        temp_path,
+                        document_id,
+                    )
                 )
 
-            # The dense retriever reads Qdrant directly. BM25 keeps
-            # a per-document cache, so invalidate it after indexing.
+            # Dense retrieval reads Qdrant
+            # directly. BM25 caches a local
+            # per-document lexical index.
             retriever.invalidate_document(
                 document_id=document_id,
             )
@@ -297,11 +438,21 @@ def create_app(
                 result.chunk_count,
             )
 
-            return DocumentUploadResponse(
-                document_id=result.document_id,
-                filename=result.filename,
-                page_count=result.page_count,
-                chunk_count=result.chunk_count,
+            return (
+                DocumentUploadResponse(
+                    document_id=(
+                        result.document_id
+                    ),
+                    filename=(
+                        result.filename
+                    ),
+                    page_count=(
+                        result.page_count
+                    ),
+                    chunk_count=(
+                        result.chunk_count
+                    ),
+                )
             )
 
         except HTTPException:
@@ -335,18 +486,25 @@ def create_app(
 
             raise HTTPException(
                 status_code=500,
-                detail="Document ingestion failed",
+                detail=(
+                    "Document ingestion "
+                    "failed"
+                ),
             ) from exc
 
     @application.delete(
         "/documents/{document_id}",
-        response_model=DocumentDeleteResponse,
+        response_model=(
+            DocumentDeleteResponse
+        ),
     )
     def delete_document(
         document_id: str,
         ingestion_service: Annotated[
             IngestionService,
-            Depends(get_ingestion_service),
+            Depends(
+                get_ingestion_service
+            ),
         ],
         retriever: Annotated[
             RerankingRetriever,
@@ -354,7 +512,9 @@ def create_app(
         ],
     ) -> DocumentDeleteResponse:
         """
-        Delete a document's vectors and invalidate its retrieval cache.
+        Delete all vectors belonging to one
+        document and invalidate its BM25
+        cache.
         """
 
         logger.info(
@@ -366,8 +526,12 @@ def create_app(
         )
 
         try:
-            ingestion_service.vector_store.delete_document(
-                document_id=document_id,
+            (
+                ingestion_service
+                .vector_store
+                .delete_document(
+                    document_id=document_id,
+                )
             )
 
             retriever.invalidate_document(
@@ -382,9 +546,11 @@ def create_app(
                 document_id,
             )
 
-            return DocumentDeleteResponse(
-                document_id=document_id,
-                deleted=True,
+            return (
+                DocumentDeleteResponse(
+                    document_id=document_id,
+                    deleted=True,
+                )
             )
 
         except HTTPException:
@@ -402,7 +568,10 @@ def create_app(
 
             raise HTTPException(
                 status_code=500,
-                detail="Document deletion failed",
+                detail=(
+                    "Document deletion "
+                    "failed"
+                ),
             ) from exc
 
     @application.post(
@@ -423,17 +592,22 @@ def create_app(
         """
         Execute the complete RAG pipeline.
 
-        The request is traced in Langfuse with separate
-        retrieval and generation observations.
+        The request is traced in Langfuse
+        with separate retrieval and
+        generation observations.
         """
 
         request_id = str(
             uuid4()
         )
 
-        total_start = time.perf_counter()
+        total_start = (
+            time.perf_counter()
+        )
 
-        langfuse = get_langfuse_client()
+        langfuse = (
+            get_langfuse_client()
+        )
 
         logger.info(
             (
@@ -448,53 +622,85 @@ def create_app(
         )
 
         try:
-            with langfuse.start_as_current_observation(
-                as_type="span",
-                name="rag-query",
-                input={
-                    "document_id": request.document_id,
-                    "question": request.question,
-                },
-                metadata={
-                    "request_id": request_id,
-                    "document_id": request.document_id,
-                },
+            with (
+                langfuse
+                .start_as_current_observation(
+                    as_type="span",
+                    name="rag-query",
+                    input={
+                        "document_id": (
+                            request.document_id
+                        ),
+                        "question": (
+                            request.question
+                        ),
+                    },
+                    metadata={
+                        "request_id": (
+                            request_id
+                        ),
+                        "document_id": (
+                            request.document_id
+                        ),
+                    },
+                )
             ) as rag_span:
-
                 retrieval_start = (
                     time.perf_counter()
                 )
 
-                with langfuse.start_as_current_observation(
-                    as_type="retriever",
-                    name="hybrid-retrieval-reranking",
-                    input={
-                        "query": request.question,
-                        "document_id": request.document_id,
-                        "top_k": 5,
-                        "rerank_candidates": 30,
-                    },
+                with (
+                    langfuse
+                    .start_as_current_observation(
+                        as_type="retriever",
+                        name=(
+                            "hybrid-retrieval-"
+                            "reranking"
+                        ),
+                        input={
+                            "query": (
+                                request.question
+                            ),
+                            "document_id": (
+                                request.document_id
+                            ),
+                            "top_k": 5,
+                            "rerank_candidates": (
+                                30
+                            ),
+                        },
+                    )
                 ) as retrieval_span:
-
-                    chunks = retriever.search(
-                        query=request.question,
-                        document_id=request.document_id,
-                        top_k=5,
+                    chunks = (
+                        retriever.search(
+                            query=(
+                                request.question
+                            ),
+                            document_id=(
+                                request.document_id
+                            ),
+                            top_k=5,
+                        )
                     )
 
                     if not chunks:
                         raise HTTPException(
                             status_code=404,
                             detail=(
-                                "No indexed chunks found for "
-                                "the requested document_id"
+                                "No indexed chunks "
+                                "found for the "
+                                "requested "
+                                "document_id"
                             ),
                         )
 
                     retrieval_ms = (
-                        time.perf_counter()
-                        - retrieval_start
-                    ) * 1000
+                        (
+                            time.perf_counter()
+                            - retrieval_start
+                        )
+                        * 1000
+                    )
 
                     retrieval_span.update(
                         output=[
@@ -509,11 +715,12 @@ def create_app(
                                 "chunk_index": (
                                     chunk.chunk_index
                                 ),
-                                "score": (
-                                    float(chunk.score)
+                                "score": float(
+                                    chunk.score
                                 ),
                             }
-                            for rank, chunk in enumerate(
+                            for rank, chunk
+                            in enumerate(
                                 chunks,
                                 start=1,
                             )
@@ -532,43 +739,63 @@ def create_app(
                     time.perf_counter()
                 )
 
-                with langfuse.start_as_current_observation(
-                    as_type="generation",
-                    name="gemini-generation",
-                    model="gemini-2.5-flash",
-                    input={
-                        "document_id": request.document_id,
-                        "question": request.question,
-                        "sources": [
-                            {
-                                "source_id": index,
-                                "filename": (
-                                    chunk.filename
-                                ),
-                                "page_number": (
-                                    chunk.page_number
-                                ),
-                                "chunk_index": (
-                                    chunk.chunk_index
-                                ),
-                            }
-                            for index, chunk in enumerate(
-                                chunks,
-                                start=1,
-                            )
-                        ],
-                    },
+                with (
+                    langfuse
+                    .start_as_current_observation(
+                        as_type="generation",
+                        name=(
+                            "gemini-generation"
+                        ),
+                        model=(
+                            "gemini-2.5-flash"
+                        ),
+                        input={
+                            "document_id": (
+                                request.document_id
+                            ),
+                            "question": (
+                                request.question
+                            ),
+                            "sources": [
+                                {
+                                    "source_id": (
+                                        index
+                                    ),
+                                    "filename": (
+                                        chunk.filename
+                                    ),
+                                    "page_number": (
+                                        chunk.page_number
+                                    ),
+                                    "chunk_index": (
+                                        chunk.chunk_index
+                                    ),
+                                }
+                                for index, chunk
+                                in enumerate(
+                                    chunks,
+                                    start=1,
+                                )
+                            ],
+                        },
+                    )
                 ) as generation_span:
-
-                    result = generator.generate(
-                        query=request.question,
-                        chunks=chunks,
+                    result = (
+                        generator.generate(
+                            query=(
+                                request.question
+                            ),
+                            chunks=chunks,
+                        )
                     )
 
                     generation_ms = (
-                        time.perf_counter()
-                        - generation_start
-                    ) * 1000
+                        (
+                            time.perf_counter()
+                            - generation_start
+                        )
+                        * 1000
+                    )
 
                     generation_span.update(
                         output={
@@ -576,7 +803,10 @@ def create_app(
                                 result.answer
                             ),
                             "citations": [
-                                citation.source_id
+                                (
+                                    citation
+                                    .source_id
+                                )
                                 for citation
                                 in result.citations
                             ],
@@ -608,13 +838,17 @@ def create_app(
                             citation.chunk_index
                         ),
                     )
-                    for citation in result.citations
+                    for citation
+                    in result.citations
                 ]
 
                 total_ms = (
-                    time.perf_counter()
-                    - total_start
-                ) * 1000
+                    (
+                        time.perf_counter()
+                        - total_start
+                    )
+                    * 1000
+                )
 
                 rag_span.update(
                     output={
@@ -682,9 +916,12 @@ def create_app(
 
         except ValueError as exc:
             total_ms = (
-                time.perf_counter()
-                - total_start
-            ) * 1000
+                (
+                    time.perf_counter()
+                    - total_start
+                )
+                * 1000
+            )
 
             logger.warning(
                 (
@@ -706,9 +943,12 @@ def create_app(
 
         except Exception as exc:
             total_ms = (
-                time.perf_counter()
-                - total_start
-            ) * 1000
+                (
+                    time.perf_counter()
+                    - total_start
+                )
+                * 1000
+            )
 
             logger.exception(
                 (
@@ -723,7 +963,10 @@ def create_app(
 
             raise HTTPException(
                 status_code=500,
-                detail="Internal RAG pipeline error",
+                detail=(
+                    "Internal RAG pipeline "
+                    "error"
+                ),
             ) from exc
 
     return application
