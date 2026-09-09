@@ -12,14 +12,12 @@ WORKDIR /app
 
 COPY pyproject.toml uv.lock ./
 
-RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --locked --no-dev --no-install-project
+RUN uv sync --locked --no-dev --no-install-project
 
 COPY README.md ./
 COPY src ./src
 
-RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --locked --no-dev
+RUN uv sync --locked --no-dev
 
 EXPOSE 8000
 
