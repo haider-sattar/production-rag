@@ -20,3 +20,12 @@ QDRANT_TIMEOUT_SECONDS = float(
         "120",
     )
 )
+
+FRONTEND_ORIGINS = [
+    origin.strip()
+    for origin in os.getenv(
+        "FRONTEND_ORIGINS",
+        "http://localhost:5173",
+    ).split(",")
+    if origin.strip()
+]

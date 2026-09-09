@@ -15,9 +15,8 @@ from fastapi import (
     Request,
     UploadFile,
 )
-from starlette.concurrency import (
-    run_in_threadpool,
-)
+from fastapi.middleware.cors import CORSMiddleware
+from starlette.concurrency import run_in_threadpool
 
 from rag.api.schemas import (
     CitationResponse,
@@ -27,58 +26,33 @@ from rag.api.schemas import (
     QueryResponse,
 )
 from rag.config import (
+    FRONTEND_ORIGINS,
     QDRANT_API_KEY,
     QDRANT_URL,
 )
-from rag.generation.clients.gemini_client import (
-    GeminiClient,
-)
+from rag.generation.clients.gemini_client import GeminiClient
 from rag.generation.generator import Generator
-from rag.ingestion.service import (
-    IngestionService,
-)
-from rag.observability.langfuse import (
-    get_langfuse_client,
-)
-from rag.observability.logging import (
-    configure_logging,
-)
-from rag.retrieval.bm25_retriever import (
-    BM25Retriever,
-)
-from rag.retrieval.embeddings import (
-    EmbeddingService,
-)
-from rag.retrieval.hybrid_retriever import (
-    HybridRetriever,
-)
-from rag.retrieval.reranking_retriever import (
-    RerankingRetriever,
-)
+from rag.ingestion.service import IngestionService
+from rag.observability.langfuse import get_langfuse_client
+from rag.observability.logging import configure_logging
+from rag.retrieval.bm25_retriever import BM25Retriever
+from rag.retrieval.embeddings import EmbeddingService
+from rag.retrieval.hybrid_retriever import HybridRetriever
+from rag.retrieval.reranking_retriever import RerankingRetriever
 from rag.retrieval.retriever import Retriever
-from rag.retrieval.vector_store import (
-    VectorStore,
-)
+from rag.retrieval.vector_store import VectorStore
 
 configure_logging()
 
-logger = logging.getLogger(
-    "rag.api"
-)
+logger = logging.getLogger("rag.api")
 
-MAX_PDF_SIZE_BYTES = (
-    20 * 1024 * 1024
-)
+MAX_PDF_SIZE_BYTES = 20 * 1024 * 1024
 
 
 def create_retriever(
-    embedding_service: (
-        EmbeddingService | None
-    ) = None,
+    embedding_service: EmbeddingService | None = None,
     qdrant_url: str = QDRANT_URL,
-    qdrant_api_key: (
-        str | None
-    ) = QDRANT_API_KEY,
+    qdrant_api_key: str | None = QDRANT_API_KEY,
 ) -> RerankingRetriever:
     """
     Create the production retrieval pipeline.
@@ -89,20 +63,15 @@ def create_retriever(
         -> Reciprocal Rank Fusion
         -> cross-encoder reranking
 
-    Qdrant Cloud credentials are passed to
-    every component that communicates directly
-    with Qdrant.
+    Qdrant credentials are passed to every component
+    that communicates directly with Qdrant.
     """
 
     if embedding_service is None:
-        embedding_service = (
-            EmbeddingService()
-        )
+        embedding_service = EmbeddingService()
 
     dense_retriever = Retriever(
-        embedding_service=(
-            embedding_service
-        ),
+        embedding_service=embedding_service,
         url=qdrant_url,
         api_key=qdrant_api_key,
     )
@@ -112,31 +81,22 @@ def create_retriever(
         api_key=qdrant_api_key,
     )
 
-    hybrid_retriever = (
-        HybridRetriever(
-            dense_retriever=(
-                dense_retriever
-            ),
-            bm25_retriever=(
-                bm25_retriever
-            ),
-            candidate_k=30,
-            rrf_constant=60,
-        )
+    hybrid_retriever = HybridRetriever(
+        dense_retriever=dense_retriever,
+        bm25_retriever=bm25_retriever,
+        candidate_k=30,
+        rrf_constant=60,
     )
 
     return RerankingRetriever(
-        hybrid_retriever=(
-            hybrid_retriever
-        ),
+        hybrid_retriever=hybrid_retriever,
         rerank_candidates=30,
     )
 
 
 def create_generator() -> Generator:
     """
-    Create the production generation
-    pipeline.
+    Create the production generation pipeline.
     """
 
     return Generator(
@@ -152,12 +112,10 @@ def create_app(
 
     initialize_rag=True:
         Production/development application.
-        Heavy RAG components are loaded
-        during startup.
+        Heavy RAG components are loaded during startup.
 
     initialize_rag=False:
-        Lightweight application used for
-        unit tests.
+        Lightweight application used for unit tests.
     """
 
     @asynccontextmanager
@@ -165,51 +123,31 @@ def create_app(
         app: FastAPI,
     ) -> AsyncIterator[None]:
         """
-        Initialize application-wide RAG
-        dependencies once at startup.
+        Initialize application-wide RAG dependencies once at startup.
 
-        The same embedding model instance is
-        shared between ingestion and dense
-        retrieval.
+        The same embedding model instance is shared between ingestion
+        and dense retrieval.
         """
 
         if initialize_rag:
-            embedding_service = (
-                EmbeddingService()
-            )
+            embedding_service = EmbeddingService()
 
             vector_store = VectorStore(
                 url=QDRANT_URL,
                 api_key=QDRANT_API_KEY,
             )
 
-            app.state.retriever = (
-                create_retriever(
-                    embedding_service=(
-                        embedding_service
-                    ),
-                    qdrant_url=(
-                        QDRANT_URL
-                    ),
-                    qdrant_api_key=(
-                        QDRANT_API_KEY
-                    ),
-                )
+            app.state.retriever = create_retriever(
+                embedding_service=embedding_service,
+                qdrant_url=QDRANT_URL,
+                qdrant_api_key=QDRANT_API_KEY,
             )
 
-            app.state.generator = (
-                create_generator()
-            )
+            app.state.generator = create_generator()
 
-            app.state.ingestion_service = (
-                IngestionService(
-                    embedding_service=(
-                        embedding_service
-                    ),
-                    vector_store=(
-                        vector_store
-                    ),
-                )
+            app.state.ingestion_service = IngestionService(
+                embedding_service=embedding_service,
+                vector_store=vector_store,
             )
 
             logger.info(
@@ -228,62 +166,64 @@ def create_app(
         title="Production RAG API",
         version="0.1.0",
         description=(
-            "Production-style "
-            "Retrieval-Augmented Generation "
-            "API with hybrid retrieval, "
-            "reranking, generation, validated "
-            "citations, and observability."
+            "Production-style Retrieval-Augmented Generation "
+            "API with hybrid retrieval, reranking, generation, "
+            "validated citations, and observability."
         ),
         lifespan=lifespan,
+    )
+
+    # Allow approved frontend origins to call the API.
+    #
+    # Example production value:
+    # FRONTEND_ORIGINS=
+    # http://localhost:5173,https://your-app.vercel.app
+    application.add_middleware(
+        CORSMiddleware,
+        allow_origins=FRONTEND_ORIGINS,
+        allow_credentials=False,
+        allow_methods=[
+            "GET",
+            "POST",
+            "DELETE",
+            "OPTIONS",
+        ],
+        allow_headers=[
+            "Content-Type",
+        ],
     )
 
     def get_retriever(
         request: Request,
     ) -> RerankingRetriever:
         """
-        Return the application-wide
-        retriever.
+        Return the application-wide retriever.
         """
 
-        return (
-            request.app.state.retriever
-        )
+        return request.app.state.retriever
 
     def get_generator(
         request: Request,
     ) -> Generator:
         """
-        Return the application-wide
-        generator.
+        Return the application-wide generator.
         """
 
-        return (
-            request.app.state.generator
-        )
+        return request.app.state.generator
 
     def get_ingestion_service(
         request: Request,
     ) -> IngestionService:
         """
-        Return the application-wide
-        ingestion service.
+        Return the application-wide ingestion service.
         """
 
-        return (
-            request.app.state
-            .ingestion_service
-        )
+        return request.app.state.ingestion_service
 
-    @application.get(
-        "/health"
-    )
-    def health_check() -> dict[
-        str,
-        str,
-    ]:
+    @application.get("/health")
+    def health_check() -> dict[str, str]:
         """
-        Verify that the API process is
-        running.
+        Verify that the API process is running.
         """
 
         return {
@@ -292,25 +232,19 @@ def create_app(
 
     @application.post(
         "/documents",
-        response_model=(
-            DocumentUploadResponse
-        ),
+        response_model=DocumentUploadResponse,
         status_code=201,
     )
     async def upload_document(
         file: Annotated[
             UploadFile,
             File(
-                description=(
-                    "PDF document to index."
-                ),
+                description="PDF document to index.",
             ),
         ],
         ingestion_service: Annotated[
             IngestionService,
-            Depends(
-                get_ingestion_service
-            ),
+            Depends(get_ingestion_service),
         ],
         retriever: Annotated[
             RerankingRetriever,
@@ -320,28 +254,19 @@ def create_app(
         """
         Upload and index one PDF.
 
-        The endpoint validates the upload,
-        assigns a fresh document_id, runs the
-        ingestion pipeline, and returns
-        metadata required for later queries.
+        The endpoint validates the upload, assigns a fresh document_id,
+        runs the ingestion pipeline, and returns metadata required for
+        later queries.
         """
 
         filename = Path(
-            file.filename
-            or "document.pdf"
+            file.filename or "document.pdf"
         ).name
 
-        if (
-            Path(filename)
-            .suffix.lower()
-            != ".pdf"
-        ):
+        if Path(filename).suffix.lower() != ".pdf":
             raise HTTPException(
                 status_code=415,
-                detail=(
-                    "Only PDF files are "
-                    "supported"
-                ),
+                detail="Only PDF files are supported",
             )
 
         contents = await file.read(
@@ -351,37 +276,22 @@ def create_app(
         if not contents:
             raise HTTPException(
                 status_code=400,
-                detail=(
-                    "Uploaded PDF is empty"
-                ),
+                detail="Uploaded PDF is empty",
             )
 
-        if (
-            len(contents)
-            > MAX_PDF_SIZE_BYTES
-        ):
+        if len(contents) > MAX_PDF_SIZE_BYTES:
             raise HTTPException(
                 status_code=413,
-                detail=(
-                    "PDF exceeds the 20 MB "
-                    "upload limit"
-                ),
+                detail="PDF exceeds the 20 MB upload limit",
             )
 
-        if not contents.startswith(
-            b"%PDF-"
-        ):
+        if not contents.startswith(b"%PDF-"):
             raise HTTPException(
                 status_code=415,
-                detail=(
-                    "Uploaded file is not "
-                    "a valid PDF"
-                ),
+                detail="Uploaded file is not a valid PDF",
             )
 
-        document_id = str(
-            uuid4()
-        )
+        document_id = str(uuid4())
 
         logger.info(
             (
@@ -396,30 +306,24 @@ def create_app(
         )
 
         try:
-            with TemporaryDirectory() as (
-                temp_dir
-            ):
+            with TemporaryDirectory() as temp_dir:
                 temp_path = (
-                    Path(temp_dir)
-                    / filename
+                    Path(temp_dir) / filename
                 )
 
                 temp_path.write_bytes(
                     contents
                 )
 
-                result = (
-                    await run_in_threadpool(
-                        ingestion_service
-                        .ingest_pdf,
-                        temp_path,
-                        document_id,
-                    )
+                result = await run_in_threadpool(
+                    ingestion_service.ingest_pdf,
+                    temp_path,
+                    document_id,
                 )
 
-            # Dense retrieval reads Qdrant
-            # directly. BM25 caches a local
-            # per-document lexical index.
+            # Dense retrieval reads directly from Qdrant.
+            # BM25 keeps a local per-document lexical cache,
+            # so invalidate it after new ingestion.
             retriever.invalidate_document(
                 document_id=document_id,
             )
@@ -438,21 +342,11 @@ def create_app(
                 result.chunk_count,
             )
 
-            return (
-                DocumentUploadResponse(
-                    document_id=(
-                        result.document_id
-                    ),
-                    filename=(
-                        result.filename
-                    ),
-                    page_count=(
-                        result.page_count
-                    ),
-                    chunk_count=(
-                        result.chunk_count
-                    ),
-                )
+            return DocumentUploadResponse(
+                document_id=result.document_id,
+                filename=result.filename,
+                page_count=result.page_count,
+                chunk_count=result.chunk_count,
             )
 
         except HTTPException:
@@ -486,25 +380,18 @@ def create_app(
 
             raise HTTPException(
                 status_code=500,
-                detail=(
-                    "Document ingestion "
-                    "failed"
-                ),
+                detail="Document ingestion failed",
             ) from exc
 
     @application.delete(
         "/documents/{document_id}",
-        response_model=(
-            DocumentDeleteResponse
-        ),
+        response_model=DocumentDeleteResponse,
     )
     def delete_document(
         document_id: str,
         ingestion_service: Annotated[
             IngestionService,
-            Depends(
-                get_ingestion_service
-            ),
+            Depends(get_ingestion_service),
         ],
         retriever: Annotated[
             RerankingRetriever,
@@ -512,9 +399,8 @@ def create_app(
         ],
     ) -> DocumentDeleteResponse:
         """
-        Delete all vectors belonging to one
-        document and invalidate its BM25
-        cache.
+        Delete all vectors belonging to one document and invalidate
+        its BM25 cache.
         """
 
         logger.info(
@@ -526,12 +412,8 @@ def create_app(
         )
 
         try:
-            (
-                ingestion_service
-                .vector_store
-                .delete_document(
-                    document_id=document_id,
-                )
+            ingestion_service.vector_store.delete_document(
+                document_id=document_id,
             )
 
             retriever.invalidate_document(
@@ -546,11 +428,9 @@ def create_app(
                 document_id,
             )
 
-            return (
-                DocumentDeleteResponse(
-                    document_id=document_id,
-                    deleted=True,
-                )
+            return DocumentDeleteResponse(
+                document_id=document_id,
+                deleted=True,
             )
 
         except HTTPException:
@@ -568,10 +448,7 @@ def create_app(
 
             raise HTTPException(
                 status_code=500,
-                detail=(
-                    "Document deletion "
-                    "failed"
-                ),
+                detail="Document deletion failed",
             ) from exc
 
     @application.post(
@@ -592,22 +469,15 @@ def create_app(
         """
         Execute the complete RAG pipeline.
 
-        The request is traced in Langfuse
-        with separate retrieval and
+        The request is traced in Langfuse with separate retrieval and
         generation observations.
         """
 
-        request_id = str(
-            uuid4()
-        )
+        request_id = str(uuid4())
 
-        total_start = (
-            time.perf_counter()
-        )
+        total_start = time.perf_counter()
 
-        langfuse = (
-            get_langfuse_client()
-        )
+        langfuse = get_langfuse_client()
 
         logger.info(
             (
@@ -622,75 +492,42 @@ def create_app(
         )
 
         try:
-            with (
-                langfuse
-                .start_as_current_observation(
-                    as_type="span",
-                    name="rag-query",
-                    input={
-                        "document_id": (
-                            request.document_id
-                        ),
-                        "question": (
-                            request.question
-                        ),
-                    },
-                    metadata={
-                        "request_id": (
-                            request_id
-                        ),
-                        "document_id": (
-                            request.document_id
-                        ),
-                    },
-                )
+            with langfuse.start_as_current_observation(
+                as_type="span",
+                name="rag-query",
+                input={
+                    "document_id": request.document_id,
+                    "question": request.question,
+                },
+                metadata={
+                    "request_id": request_id,
+                    "document_id": request.document_id,
+                },
             ) as rag_span:
-                retrieval_start = (
-                    time.perf_counter()
-                )
+                retrieval_start = time.perf_counter()
 
-                with (
-                    langfuse
-                    .start_as_current_observation(
-                        as_type="retriever",
-                        name=(
-                            "hybrid-retrieval-"
-                            "reranking"
-                        ),
-                        input={
-                            "query": (
-                                request.question
-                            ),
-                            "document_id": (
-                                request.document_id
-                            ),
-                            "top_k": 5,
-                            "rerank_candidates": (
-                                30
-                            ),
-                        },
-                    )
+                with langfuse.start_as_current_observation(
+                    as_type="retriever",
+                    name="hybrid-retrieval-reranking",
+                    input={
+                        "query": request.question,
+                        "document_id": request.document_id,
+                        "top_k": 5,
+                        "rerank_candidates": 30,
+                    },
                 ) as retrieval_span:
-                    chunks = (
-                        retriever.search(
-                            query=(
-                                request.question
-                            ),
-                            document_id=(
-                                request.document_id
-                            ),
-                            top_k=5,
-                        )
+                    chunks = retriever.search(
+                        query=request.question,
+                        document_id=request.document_id,
+                        top_k=5,
                     )
 
                     if not chunks:
                         raise HTTPException(
                             status_code=404,
                             detail=(
-                                "No indexed chunks "
-                                "found for the "
-                                "requested "
-                                "document_id"
+                                "No indexed chunks found for the "
+                                "requested document_id"
                             ),
                         )
 
@@ -706,9 +543,7 @@ def create_app(
                         output=[
                             {
                                 "rank": rank,
-                                "filename": (
-                                    chunk.filename
-                                ),
+                                "filename": chunk.filename,
                                 "page_number": (
                                     chunk.page_number
                                 ),
@@ -719,8 +554,7 @@ def create_app(
                                     chunk.score
                                 ),
                             }
-                            for rank, chunk
-                            in enumerate(
+                            for rank, chunk in enumerate(
                                 chunks,
                                 start=1,
                             )
@@ -739,54 +573,40 @@ def create_app(
                     time.perf_counter()
                 )
 
-                with (
-                    langfuse
-                    .start_as_current_observation(
-                        as_type="generation",
-                        name=(
-                            "gemini-generation"
+                with langfuse.start_as_current_observation(
+                    as_type="generation",
+                    name="gemini-generation",
+                    model="gemini-2.5-flash",
+                    input={
+                        "document_id": (
+                            request.document_id
                         ),
-                        model=(
-                            "gemini-2.5-flash"
+                        "question": (
+                            request.question
                         ),
-                        input={
-                            "document_id": (
-                                request.document_id
-                            ),
-                            "question": (
-                                request.question
-                            ),
-                            "sources": [
-                                {
-                                    "source_id": (
-                                        index
-                                    ),
-                                    "filename": (
-                                        chunk.filename
-                                    ),
-                                    "page_number": (
-                                        chunk.page_number
-                                    ),
-                                    "chunk_index": (
-                                        chunk.chunk_index
-                                    ),
-                                }
-                                for index, chunk
-                                in enumerate(
-                                    chunks,
-                                    start=1,
-                                )
-                            ],
-                        },
-                    )
+                        "sources": [
+                            {
+                                "source_id": index,
+                                "filename": (
+                                    chunk.filename
+                                ),
+                                "page_number": (
+                                    chunk.page_number
+                                ),
+                                "chunk_index": (
+                                    chunk.chunk_index
+                                ),
+                            }
+                            for index, chunk in enumerate(
+                                chunks,
+                                start=1,
+                            )
+                        ],
+                    },
                 ) as generation_span:
-                    result = (
-                        generator.generate(
-                            query=(
-                                request.question
-                            ),
-                            chunks=chunks,
-                        )
+                    result = generator.generate(
+                        query=request.question,
+                        chunks=chunks,
                     )
 
                     generation_ms = (
@@ -799,14 +619,9 @@ def create_app(
 
                     generation_span.update(
                         output={
-                            "answer": (
-                                result.answer
-                            ),
+                            "answer": result.answer,
                             "citations": [
-                                (
-                                    citation
-                                    .source_id
-                                )
+                                citation.source_id
                                 for citation
                                 in result.citations
                             ],
@@ -838,8 +653,7 @@ def create_app(
                             citation.chunk_index
                         ),
                     )
-                    for citation
-                    in result.citations
+                    for citation in result.citations
                 ]
 
                 total_ms = (
@@ -852,9 +666,7 @@ def create_app(
 
                 rag_span.update(
                     output={
-                        "answer": (
-                            result.answer
-                        ),
+                        "answer": result.answer,
                         "citations": [
                             citation.source_id
                             for citation
@@ -862,9 +674,7 @@ def create_app(
                         ],
                     },
                     metadata={
-                        "request_id": (
-                            request_id
-                        ),
+                        "request_id": request_id,
                         "document_id": (
                             request.document_id
                         ),
@@ -874,9 +684,7 @@ def create_app(
                         "generation_ms": (
                             generation_ms
                         ),
-                        "total_ms": (
-                            total_ms
-                        ),
+                        "total_ms": total_ms,
                         "retrieved_chunks": (
                             len(chunks)
                         ),
@@ -963,10 +771,7 @@ def create_app(
 
             raise HTTPException(
                 status_code=500,
-                detail=(
-                    "Internal RAG pipeline "
-                    "error"
-                ),
+                detail="Internal RAG pipeline error",
             ) from exc
 
     return application
