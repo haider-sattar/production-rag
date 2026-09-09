@@ -1,4 +1,5 @@
 import logging
+import os
 import time
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
@@ -23,7 +24,12 @@ from rag.generation.generator import Generator
 from rag.ingestion.service import IngestionService
 from rag.observability.langfuse import get_langfuse_client
 from rag.observability.logging import configure_logging
+from rag.retrieval.bm25_retriever import BM25Retriever
+from rag.retrieval.embeddings import EmbeddingService
+from rag.retrieval.hybrid_retriever import HybridRetriever
 from rag.retrieval.reranking_retriever import RerankingRetriever
+from rag.retrieval.retriever import Retriever
+from rag.retrieval.vector_store import VectorStore
 
 load_dotenv()
 
@@ -37,12 +43,35 @@ logger = logging.getLogger(
 MAX_PDF_SIZE_BYTES = 20 * 1024 * 1024
 
 
-def create_retriever() -> RerankingRetriever:
+def create_retriever(
+    embedding_service: EmbeddingService | None = None,
+    qdrant_url: str = "http://localhost:6333",
+) -> RerankingRetriever:
     """
     Create the production retrieval pipeline.
     """
 
+    if embedding_service is None:
+        embedding_service = EmbeddingService()
+
+    dense_retriever = Retriever(
+        embedding_service=embedding_service,
+        url=qdrant_url,
+    )
+
+    bm25_retriever = BM25Retriever(
+        url=qdrant_url,
+    )
+
+    hybrid_retriever = HybridRetriever(
+        dense_retriever=dense_retriever,
+        bm25_retriever=bm25_retriever,
+        candidate_k=30,
+        rrf_constant=60,
+    )
+
     return RerankingRetriever(
+        hybrid_retriever=hybrid_retriever,
         rerank_candidates=30,
     )
 
@@ -77,8 +106,21 @@ def create_app(
     ) -> AsyncIterator[None]:
 
         if initialize_rag:
+            embedding_service = EmbeddingService()
+            qdrant_url = os.getenv(
+                "QDRANT_URL",
+                "http://localhost:6333",
+            )
+
+            vector_store = VectorStore(
+                url=qdrant_url,
+            )
+
             app.state.retriever = (
-                create_retriever()
+                create_retriever(
+                    embedding_service=embedding_service,
+                    qdrant_url=qdrant_url,
+                )
             )
 
             app.state.generator = (
@@ -86,7 +128,10 @@ def create_app(
             )
 
             app.state.ingestion_service = (
-                IngestionService()
+                IngestionService(
+                    embedding_service=embedding_service,
+                    vector_store=vector_store,
+                )
             )
 
         yield
